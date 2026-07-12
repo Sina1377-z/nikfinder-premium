@@ -2,8 +2,9 @@ import type { Category } from "@/lib/products";
 
 const TABS: { id: Category | "all"; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "snus", label: "Snus" },
-  { id: "vape", label: "Vape" },
+  { id: "snus", label: "Pouches" },
+  { id: "vape-disposable", label: "Disposable" },
+  { id: "vape-refillable", label: "Refillable" },
   { id: "cigarettes", label: "Cigarettes" },
 ];
 

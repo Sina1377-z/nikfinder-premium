@@ -49,29 +49,29 @@ function ProductPage() {
       {verified === false && <AgeGate onConfirm={confirm} />}
 
       <div className="relative">
-        <div className="relative aspect-square w-full overflow-hidden bg-surface-elevated">
+        <div className="relative aspect-square w-full overflow-hidden bg-white">
           <img
             src={product.image}
             alt={product.name}
             width={800}
             height={800}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain p-10"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background" />
         </div>
 
         <Link
           to="/"
-          className="absolute left-5 top-[max(1.25rem,env(safe-area-inset-top))] flex size-11 items-center justify-center rounded-full border border-white/10 bg-black/40 backdrop-blur-xl active:scale-95 transition-transform"
+          className="absolute left-5 top-[max(1.25rem,env(safe-area-inset-top))] flex size-11 items-center justify-center rounded-full border border-black/10 bg-white/80 text-black backdrop-blur-xl active:scale-95 transition-transform"
         >
           <ChevronLeft className="size-5" />
         </Link>
         <button
           onClick={() => toggle(product.id)}
-          className="absolute right-5 top-[max(1.25rem,env(safe-area-inset-top))] flex size-11 items-center justify-center rounded-full border border-white/10 bg-black/40 backdrop-blur-xl active:scale-95 transition-transform"
+          className="absolute right-5 top-[max(1.25rem,env(safe-area-inset-top))] flex size-11 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur-xl active:scale-95 transition-transform"
           aria-label="Toggle favorite"
         >
-          <Heart className={`size-5 ${fav ? "fill-primary text-primary" : "text-white"}`} />
+          <Heart className={`size-5 ${fav ? "fill-primary text-primary" : "text-black/70"}`} />
         </button>
       </div>
 
