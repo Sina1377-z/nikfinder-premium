@@ -47,10 +47,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full border border-black/10 bg-white/85 px-2.5 py-1 backdrop-blur-md">
             <span
               className={`size-1.5 rounded-full ${
-                stock === "high" ? "bg-primary" : stock === "low" ? "bg-yellow-400" : "bg-muted-foreground"
+                stock === "high" ? "bg-primary" : stock === "low" ? "bg-yellow-500" : "bg-neutral-400"
               }`}
             />
-            <span className="text-[10px] font-medium uppercase tracking-wider text-white/90">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-black/80">
               {stockLabel[stock]}
             </span>
           </div>
