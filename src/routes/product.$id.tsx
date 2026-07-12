@@ -49,15 +49,15 @@ function ProductPage() {
       {verified === false && <AgeGate onConfirm={confirm} />}
 
       <div className="relative">
-        <div className="relative aspect-square w-full overflow-hidden bg-surface-elevated">
+        <div className="relative aspect-square w-full overflow-hidden bg-white">
           <img
             src={product.image}
             alt={product.name}
             width={800}
             height={800}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain p-10"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background" />
         </div>
 
         <Link
