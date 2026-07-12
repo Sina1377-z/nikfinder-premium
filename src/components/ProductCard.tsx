@@ -25,27 +25,26 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       style={{ animationDelay: `${Math.min(index, 6) * 60}ms` }}
     >
       <div className="relative overflow-hidden rounded-3xl bg-card ring-1 ring-border transition-transform active:scale-[0.98]">
-        <div className="relative aspect-square w-full overflow-hidden bg-surface-elevated">
+        <div className="relative aspect-square w-full overflow-hidden bg-white">
           <img
             src={product.image}
             alt={product.name}
             loading="lazy"
             width={800}
             height={800}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="h-full w-full object-contain p-6 transition-transform duration-700 group-hover:scale-105"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(product.id); }}
             aria-label={fav ? "Remove from favorites" : "Add to favorites"}
-            className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-white/10 bg-black/40 backdrop-blur-md transition-transform active:scale-90"
+            className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur-md transition-transform active:scale-90"
           >
             <Heart
-              className={`size-4 transition-colors ${fav ? "fill-primary text-primary" : "text-white/80"}`}
+              className={`size-4 transition-colors ${fav ? "fill-primary text-primary" : "text-black/60"}`}
               strokeWidth={2}
             />
           </button>
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 backdrop-blur-md">
+          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full border border-black/10 bg-white/85 px-2.5 py-1 backdrop-blur-md">
             <span
               className={`size-1.5 rounded-full ${
                 stock === "high" ? "bg-primary" : stock === "low" ? "bg-yellow-400" : "bg-muted-foreground"
