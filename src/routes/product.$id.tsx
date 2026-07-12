@@ -30,7 +30,7 @@ export const Route = createFileRoute("/product/$id")({
   ),
 });
 
-const stockCopy = { high: "In stock", low: "Low stock", out: "Out of stock" } as const;
+const stockCopy: Record<"high" | "low" | "out", string> = { high: "In stock", low: "Low stock", out: "Out of stock" };
 
 function ProductPage() {
   const { product } = Route.useLoaderData();
