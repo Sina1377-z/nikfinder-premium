@@ -62,16 +62,16 @@ function ProductPage() {
 
         <Link
           to="/"
-          className="absolute left-5 top-[max(1.25rem,env(safe-area-inset-top))] flex size-11 items-center justify-center rounded-full border border-white/10 bg-black/40 backdrop-blur-xl active:scale-95 transition-transform"
+          className="absolute left-5 top-[max(1.25rem,env(safe-area-inset-top))] flex size-11 items-center justify-center rounded-full border border-black/10 bg-white/80 text-black backdrop-blur-xl active:scale-95 transition-transform"
         >
           <ChevronLeft className="size-5" />
         </Link>
         <button
           onClick={() => toggle(product.id)}
-          className="absolute right-5 top-[max(1.25rem,env(safe-area-inset-top))] flex size-11 items-center justify-center rounded-full border border-white/10 bg-black/40 backdrop-blur-xl active:scale-95 transition-transform"
+          className="absolute right-5 top-[max(1.25rem,env(safe-area-inset-top))] flex size-11 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur-xl active:scale-95 transition-transform"
           aria-label="Toggle favorite"
         >
-          <Heart className={`size-5 ${fav ? "fill-primary text-primary" : "text-white"}`} />
+          <Heart className={`size-5 ${fav ? "fill-primary text-primary" : "text-black/70"}`} />
         </button>
       </div>
 
