@@ -140,7 +140,7 @@ function ProductPage() {
                       {l.price.toFixed(2)}
                     </p>
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {stockCopy[l.stock]}
+                      {stockCopy[l.stock as "high" | "low" | "out"]}
                     </p>
                   </div>
                 </div>
