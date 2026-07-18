@@ -4,11 +4,10 @@ import { Search as SearchIcon, Tag, Package, Store } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import {
-  PRODUCTS,
-  smartSearch,
   autocomplete,
   relatedSuggestions,
 } from "@/lib/products";
+import { usePrimatSearch } from "@/lib/usePrimatSearch";
 import { useAgeGate } from "@/lib/favorites";
 import { AgeGate } from "@/components/AgeGate";
 
