@@ -8,6 +8,7 @@ import { CategoryTabs } from "@/components/CategoryTabs";
 import { PRODUCTS, type Category } from "@/lib/products";
 import { usePrimatSearch } from "@/lib/usePrimatSearch";
 import { useAgeGate } from "@/lib/favorites";
+import { useGeolocation } from "@/lib/useGeolocation";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -23,6 +24,8 @@ function Home() {
   const [showFilters, setShowFilters] = useState(false);
 
   const api = usePrimatSearch(query);
+  // Requests location once (background); available app-wide via getGeolocation().
+  useGeolocation();
   const hasQuery = query.trim().length > 0;
 
   const results = useMemo(() => {
