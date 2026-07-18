@@ -115,9 +115,19 @@ function Home() {
           <span className="font-mono text-xs text-muted-foreground">{results.length} items</span>
         </div>
 
-        {results.length === 0 ? (
+        {hasQuery && api.loading ? (
           <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
-            <p className="text-sm text-muted-foreground">No products match "{query}".</p>
+            <p className="text-sm text-muted-foreground">Searching…</p>
+          </div>
+        ) : hasQuery && api.error ? (
+          <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
+            <p className="text-sm text-muted-foreground">Couldn't reach the catalog. Please try again.</p>
+          </div>
+        ) : results.length === 0 ? (
+          <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
+            <p className="text-sm text-muted-foreground">
+              {hasQuery ? `No products found for "${query}".` : "No products available."}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
