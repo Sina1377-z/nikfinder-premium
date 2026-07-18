@@ -22,10 +22,12 @@ function Home() {
   const [sort, setSort] = useState<SortKey>("distance");
   const [showFilters, setShowFilters] = useState(false);
 
+  const api = usePrimatSearch(query);
+  const hasQuery = query.trim().length > 0;
+
   const results = useMemo(() => {
-    let list = PRODUCTS;
+    let list: typeof PRODUCTS = hasQuery ? api.data?.products ?? [] : PRODUCTS;
     if (category !== "all") list = list.filter((p) => p.category === category);
-    if (query.trim()) list = smartSearch(list, query);
     const arr = [...list];
     if (sort === "price-asc")
       arr.sort((a, b) => Math.min(...a.listings.map((l) => l.price)) - Math.min(...b.listings.map((l) => l.price)));
@@ -35,7 +37,7 @@ function Home() {
       arr.sort((a, b) => Math.min(...a.listings.map((l) => l.distanceKm)) - Math.min(...b.listings.map((l) => l.distanceKm)));
     if (sort === "strength") arr.sort((a, b) => b.strengthMg - a.strengthMg);
     return arr;
-  }, [category, query, sort]);
+  }, [category, hasQuery, api.data, sort]);
 
   return (
     <div className="min-h-screen bg-background pb-28">
