@@ -14,6 +14,7 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as ApiPublicPrimatProductsRouteImport } from './routes/api/public/primat-products'
 
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
@@ -40,6 +41,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPrimatProductsRoute = ApiPublicPrimatProductsRouteImport.update({
+  id: '/api/public/primat-products',
+  path: '/api/public/primat-products',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/alerts' | '/favorites' | '/search' | '/product/$id'
+  fullPaths:
+    | '/'
+    | '/alerts'
+    | '/favorites'
+    | '/search'
+    | '/product/$id'
+    | '/api/public/primat-products'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/alerts' | '/favorites' | '/search' | '/product/$id'
-  id: '__root__' | '/' | '/alerts' | '/favorites' | '/search' | '/product/$id'
+  to:
+    | '/'
+    | '/alerts'
+    | '/favorites'
+    | '/search'
+    | '/product/$id'
+    | '/api/public/primat-products'
+  id:
+    | '__root__'
+    | '/'
+    | '/alerts'
+    | '/favorites'
+    | '/search'
+    | '/product/$id'
+    | '/api/public/primat-products'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +105,7 @@ export interface RootRouteChildren {
   FavoritesRoute: typeof FavoritesRoute
   SearchRoute: typeof SearchRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiPublicPrimatProductsRoute: typeof ApiPublicPrimatProductsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/primat-products': {
+      id: '/api/public/primat-products'
+      path: '/api/public/primat-products'
+      fullPath: '/api/public/primat-products'
+      preLoaderRoute: typeof ApiPublicPrimatProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritesRoute: FavoritesRoute,
   SearchRoute: SearchRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiPublicPrimatProductsRoute: ApiPublicPrimatProductsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

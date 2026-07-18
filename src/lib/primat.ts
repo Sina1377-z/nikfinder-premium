@@ -20,7 +20,9 @@ import vapePurple from "@/assets/vape-purple.jpg";
 import vapeMint from "@/assets/vape-mint.jpg";
 import vapeRed from "@/assets/vape-red.jpg";
 
-const PRIMAT_ENDPOINT = "https://primat.nu/api/v1/demo/products";
+// Primat's demo endpoint doesn't send CORS headers, so browsers block direct calls.
+// Route through our own server route which proxies the request server-side.
+const PRIMAT_ENDPOINT = "/api/public/primat-products";
 
 type PrimatItem = {
   chain?: string;
