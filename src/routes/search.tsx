@@ -44,7 +44,8 @@ function SearchPage() {
   const [q, setQ] = useState("");
   const [focused, setFocused] = useState(false);
 
-  const results = useMemo(() => (q.trim() ? smartSearch(PRODUCTS, q) : []), [q]);
+  const api = usePrimatSearch(q);
+  const results = api.data?.products ?? [];
   const suggestions = useMemo(() => autocomplete(q, 6), [q]);
   const related = useMemo(() => (q.trim() ? relatedSuggestions(q, 6) : []), [q]);
 
