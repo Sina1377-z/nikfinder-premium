@@ -2,12 +2,13 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChevronLeft, Heart, Bell, Navigation, Store as StoreIcon } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { PRODUCTS, STORES, lowestPrice } from "@/lib/products";
+import { getCachedPrimatProduct } from "@/lib/primat";
 import { useAgeGate, useAlerts, useFavorites } from "@/lib/favorites";
 import { AgeGate } from "@/components/AgeGate";
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
-    const product = PRODUCTS.find((p) => p.id === params.id);
+    const product = PRODUCTS.find((p) => p.id === params.id) ?? getCachedPrimatProduct(params.id);
     if (!product) throw notFound();
     return { product };
   },

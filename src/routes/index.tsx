@@ -5,7 +5,8 @@ import { AgeGate } from "@/components/AgeGate";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryTabs } from "@/components/CategoryTabs";
-import { PRODUCTS, smartSearch, type Category } from "@/lib/products";
+import { PRODUCTS, type Category } from "@/lib/products";
+import { usePrimatSearch } from "@/lib/usePrimatSearch";
 import { useAgeGate } from "@/lib/favorites";
 
 export const Route = createFileRoute("/")({
@@ -21,10 +22,12 @@ function Home() {
   const [sort, setSort] = useState<SortKey>("distance");
   const [showFilters, setShowFilters] = useState(false);
 
+  const api = usePrimatSearch(query);
+  const hasQuery = query.trim().length > 0;
+
   const results = useMemo(() => {
-    let list = PRODUCTS;
+    let list: typeof PRODUCTS = hasQuery ? api.data?.products ?? [] : PRODUCTS;
     if (category !== "all") list = list.filter((p) => p.category === category);
-    if (query.trim()) list = smartSearch(list, query);
     const arr = [...list];
     if (sort === "price-asc")
       arr.sort((a, b) => Math.min(...a.listings.map((l) => l.price)) - Math.min(...b.listings.map((l) => l.price)));
@@ -34,7 +37,7 @@ function Home() {
       arr.sort((a, b) => Math.min(...a.listings.map((l) => l.distanceKm)) - Math.min(...b.listings.map((l) => l.distanceKm)));
     if (sort === "strength") arr.sort((a, b) => b.strengthMg - a.strengthMg);
     return arr;
-  }, [category, query, sort]);
+  }, [category, hasQuery, api.data, sort]);
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -112,9 +115,19 @@ function Home() {
           <span className="font-mono text-xs text-muted-foreground">{results.length} items</span>
         </div>
 
-        {results.length === 0 ? (
+        {hasQuery && api.loading ? (
           <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
-            <p className="text-sm text-muted-foreground">No products match "{query}".</p>
+            <p className="text-sm text-muted-foreground">Searching…</p>
+          </div>
+        ) : hasQuery && api.error ? (
+          <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
+            <p className="text-sm text-muted-foreground">Couldn't reach the catalog. Please try again.</p>
+          </div>
+        ) : results.length === 0 ? (
+          <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
+            <p className="text-sm text-muted-foreground">
+              {hasQuery ? `No products found for "${query}".` : "No products available."}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

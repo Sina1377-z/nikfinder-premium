@@ -4,11 +4,10 @@ import { Search as SearchIcon, Tag, Package, Store } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import {
-  PRODUCTS,
-  smartSearch,
   autocomplete,
   relatedSuggestions,
 } from "@/lib/products";
+import { usePrimatSearch } from "@/lib/usePrimatSearch";
 import { useAgeGate } from "@/lib/favorites";
 import { AgeGate } from "@/components/AgeGate";
 
@@ -45,7 +44,8 @@ function SearchPage() {
   const [q, setQ] = useState("");
   const [focused, setFocused] = useState(false);
 
-  const results = useMemo(() => (q.trim() ? smartSearch(PRODUCTS, q) : []), [q]);
+  const api = usePrimatSearch(q);
+  const results = api.data?.products ?? [];
   const suggestions = useMemo(() => autocomplete(q, 6), [q]);
   const related = useMemo(() => (q.trim() ? relatedSuggestions(q, 6) : []), [q]);
 
@@ -129,9 +129,19 @@ function SearchPage() {
         )}
       </header>
       <main className="mx-auto max-w-lg px-5">
-        {q && results.length === 0 && (
+        {q && api.loading && (
           <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
-            <p className="text-sm text-muted-foreground">No matches for "{q}".</p>
+            <p className="text-sm text-muted-foreground">Searching…</p>
+          </div>
+        )}
+        {q && !api.loading && api.error && (
+          <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
+            <p className="text-sm text-muted-foreground">Couldn't reach the catalog. Please try again.</p>
+          </div>
+        )}
+        {q && !api.loading && !api.error && results.length === 0 && (
+          <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
+            <p className="text-sm text-muted-foreground">No products found for "{q}".</p>
           </div>
         )}
         {results.length > 0 && (
