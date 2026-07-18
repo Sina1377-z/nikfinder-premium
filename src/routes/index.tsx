@@ -5,7 +5,8 @@ import { AgeGate } from "@/components/AgeGate";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryTabs } from "@/components/CategoryTabs";
-import { PRODUCTS, smartSearch, type Category } from "@/lib/products";
+import { PRODUCTS, type Category } from "@/lib/products";
+import { usePrimatSearch } from "@/lib/usePrimatSearch";
 import { useAgeGate } from "@/lib/favorites";
 
 export const Route = createFileRoute("/")({
