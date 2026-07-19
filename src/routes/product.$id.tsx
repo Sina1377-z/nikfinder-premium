@@ -1,10 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ChevronLeft, Heart, Bell, Navigation, Store as StoreIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, Heart, Bell, Navigation, Store as StoreIcon, Map as MapIcon } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { PRODUCTS, STORES, lowestPrice } from "@/lib/products";
 import { getCachedPrimatProduct } from "@/lib/primat";
 import { useAgeGate, useAlerts, useFavorites } from "@/lib/favorites";
 import { AgeGate } from "@/components/AgeGate";
+import { useGeolocation } from "@/lib/useGeolocation";
+import { useStoreEnrichment, fetchStoreHours } from "@/lib/useStoreEnrichment";
+import { googleMapsNavigateUrl } from "@/lib/googleMaps";
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
@@ -33,17 +37,63 @@ export const Route = createFileRoute("/product/$id")({
 
 const stockCopy: Record<"high" | "low" | "out", string> = { high: "In stock", low: "Low stock", out: "Out of stock" };
 
+type SortMode = "nearest" | "cheapest";
+
 function ProductPage() {
   const { product } = Route.useLoaderData();
   const { verified, confirm } = useAgeGate();
   const { isFav, toggle } = useFavorites();
   const { has, toggle: toggleAlert } = useAlerts();
+  const geo = useGeolocation();
+  const userPoint = geo.latitude != null && geo.longitude != null ? { lat: geo.latitude, lng: geo.longitude } : null;
+  const enrichVersion = useStoreEnrichment([product], userPoint);
+  const [sortMode, setSortMode] = useState<SortMode>("nearest");
+  const [openHoursFor, setOpenHoursFor] = useState<string | null>(null);
+  const [hoursMap, setHoursMap] = useState<Record<string, string[] | "loading" | "unavailable">>({});
 
-  const sorted = [...product.listings].sort((a, b) => a.price - b.price);
+  // Track enrichVersion so listing distances re-render.
+  void enrichVersion;
+
+  const sorted = [...product.listings].sort((a, b) => {
+    if (sortMode === "cheapest") return a.price - b.price;
+    const da = a.distanceKm || Infinity;
+    const db = b.distanceKm || Infinity;
+    if (da === db) return a.price - b.price;
+    return da - db;
+  });
+  const cheapestListing = [...product.listings].sort((a, b) => a.price - b.price)[0];
   const best = sorted[0];
   const cheapest = lowestPrice(product);
   const fav = isFav(product.id);
   const alertOn = has(product.id);
+
+  async function handleOpeningHours(storeId: string) {
+    if (openHoursFor === storeId) {
+      setOpenHoursFor(null);
+      return;
+    }
+    setOpenHoursFor(storeId);
+    if (hoursMap[storeId]) return;
+    const s = STORES[storeId];
+    if (s?.openingHours?.length) {
+      setHoursMap((m) => ({ ...m, [storeId]: s.openingHours! }));
+      return;
+    }
+    setHoursMap((m) => ({ ...m, [storeId]: "loading" }));
+    const hrs = await fetchStoreHours(storeId);
+    setHoursMap((m) => ({ ...m, [storeId]: hrs && hrs.length ? hrs : "unavailable" }));
+  }
+
+  function handleNavigate(storeId: string) {
+    const s = STORES[storeId];
+    if (!s) return;
+    const url = googleMapsNavigateUrl({
+      address: s.address,
+      name: s.name,
+      location: s.lat != null && s.lng != null ? { lat: s.lat, lng: s.lng } : undefined,
+    });
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -98,18 +148,43 @@ function ProductPage() {
               {cheapest.toFixed(2)}
               <span className="ml-1 text-sm font-mono text-muted-foreground">SEK</span>
             </p>
-            <p className="text-xs text-muted-foreground">at {STORES[best.storeId].name}</p>
+            <p className="text-xs text-muted-foreground text-right">at {STORES[cheapestListing.storeId].name}</p>
           </div>
         </section>
 
         <section className="animate-fade-up space-y-3">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-            Nearby availability
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+              Nearby availability
+            </h2>
+            <div className="flex gap-1 rounded-full border border-border bg-card p-1">
+              {(["nearest", "cheapest"] as const).map((k) => (
+                <button
+                  key={k}
+                  onClick={() => setSortMode(k)}
+                  className={`rounded-full px-3 py-1 text-[10px] font-mono uppercase tracking-wider transition-colors ${
+                    sortMode === k ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {k}
+                </button>
+              ))}
+            </div>
+          </div>
+          <Link
+            to="/map/$id"
+            params={{ id: product.id }}
+            className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card/40 py-3 text-xs font-medium text-foreground/85 transition-colors hover:text-foreground"
+          >
+            <MapIcon className="size-3.5" />
+            View stores on map
+          </Link>
           {sorted.map((l, i) => {
             const store = STORES[l.storeId];
             const isBest = i === 0 && l.stock !== "out";
             const isOut = l.stock === "out";
+            const openState = hoursMap[l.storeId];
+            const isOpenPanel = openHoursFor === l.storeId;
             return (
               <div
                 key={l.storeId}
@@ -127,14 +202,15 @@ function ProductPage() {
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold">{store.name}</p>
                       <p className="truncate text-[11px] text-muted-foreground">
-                        {store.hours} · {l.distanceKm.toFixed(1)} km
+                        {store.address ? `${store.address}` : store.hours}
+                        {l.distanceKm ? ` · ${l.distanceKm.toFixed(1)} km` : ""}
                       </p>
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
                     {isBest && (
                       <span className="mb-1 inline-block rounded-full bg-primary/20 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-primary">
-                        Best Price
+                        {sortMode === "cheapest" ? "Cheapest" : "Nearest"}
                       </span>
                     )}
                     <p className={`font-mono text-sm font-bold ${isBest ? "text-primary" : ""}`}>
@@ -147,13 +223,33 @@ function ProductPage() {
                 </div>
                 {!isOut && (
                   <div className="mt-3 flex gap-2">
-                    <button className="flex-1 rounded-xl border border-border bg-background/60 py-2 text-xs font-medium text-foreground/80 transition-colors hover:text-foreground">
+                    <button
+                      onClick={() => handleOpeningHours(l.storeId)}
+                      className="flex-1 rounded-xl border border-border bg-background/60 py-2 text-xs font-medium text-foreground/80 transition-colors hover:text-foreground"
+                    >
                       Opening hours
                     </button>
-                    <button className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-foreground py-2 text-xs font-semibold text-background transition-transform active:scale-95">
+                    <button
+                      onClick={() => handleNavigate(l.storeId)}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-foreground py-2 text-xs font-semibold text-background transition-transform active:scale-95"
+                    >
                       <Navigation className="size-3.5" />
                       Navigate
                     </button>
+                  </div>
+                )}
+                {isOpenPanel && (
+                  <div className="mt-3 rounded-2xl border border-border bg-background/40 p-3 text-xs text-foreground/85">
+                    {openState === "loading" && <p className="text-muted-foreground">Loading opening hours…</p>}
+                    {openState === "unavailable" && <p className="text-muted-foreground">Opening hours unavailable.</p>}
+                    {Array.isArray(openState) && (
+                      <ul className="space-y-1">
+                        {openState.map((line) => (
+                          <li key={line} className="font-mono text-[11px]">{line}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {!openState && <p className="text-muted-foreground">Opening hours unavailable.</p>}
                   </div>
                 )}
               </div>
@@ -198,3 +294,6 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+// silence unused import warning for useEffect (kept for possible future use)
+void useEffect;

@@ -14,7 +14,9 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as MapIdRouteImport } from './routes/map.$id'
 import { Route as ApiPublicPrimatProductsRouteImport } from './routes/api/public/primat-products'
+import { Route as ApiPublicGmapsRouteImport } from './routes/api/public/gmaps'
 
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
@@ -41,9 +43,19 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MapIdRoute = MapIdRouteImport.update({
+  id: '/map/$id',
+  path: '/map/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPrimatProductsRoute = ApiPublicPrimatProductsRouteImport.update({
   id: '/api/public/primat-products',
   path: '/api/public/primat-products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicGmapsRoute = ApiPublicGmapsRouteImport.update({
+  id: '/api/public/gmaps',
+  path: '/api/public/gmaps',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -52,7 +64,9 @@ export interface FileRoutesByFullPath {
   '/alerts': typeof AlertsRoute
   '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
+  '/map/$id': typeof MapIdRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/gmaps': typeof ApiPublicGmapsRoute
   '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
 }
 export interface FileRoutesByTo {
@@ -60,7 +74,9 @@ export interface FileRoutesByTo {
   '/alerts': typeof AlertsRoute
   '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
+  '/map/$id': typeof MapIdRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/gmaps': typeof ApiPublicGmapsRoute
   '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
 }
 export interface FileRoutesById {
@@ -69,7 +85,9 @@ export interface FileRoutesById {
   '/alerts': typeof AlertsRoute
   '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
+  '/map/$id': typeof MapIdRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/gmaps': typeof ApiPublicGmapsRoute
   '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
 }
 export interface FileRouteTypes {
@@ -79,7 +97,9 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/favorites'
     | '/search'
+    | '/map/$id'
     | '/product/$id'
+    | '/api/public/gmaps'
     | '/api/public/primat-products'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -87,7 +107,9 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/favorites'
     | '/search'
+    | '/map/$id'
     | '/product/$id'
+    | '/api/public/gmaps'
     | '/api/public/primat-products'
   id:
     | '__root__'
@@ -95,7 +117,9 @@ export interface FileRouteTypes {
     | '/alerts'
     | '/favorites'
     | '/search'
+    | '/map/$id'
     | '/product/$id'
+    | '/api/public/gmaps'
     | '/api/public/primat-products'
   fileRoutesById: FileRoutesById
 }
@@ -104,7 +128,9 @@ export interface RootRouteChildren {
   AlertsRoute: typeof AlertsRoute
   FavoritesRoute: typeof FavoritesRoute
   SearchRoute: typeof SearchRoute
+  MapIdRoute: typeof MapIdRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiPublicGmapsRoute: typeof ApiPublicGmapsRoute
   ApiPublicPrimatProductsRoute: typeof ApiPublicPrimatProductsRoute
 }
 
@@ -145,11 +171,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/map/$id': {
+      id: '/map/$id'
+      path: '/map/$id'
+      fullPath: '/map/$id'
+      preLoaderRoute: typeof MapIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/primat-products': {
       id: '/api/public/primat-products'
       path: '/api/public/primat-products'
       fullPath: '/api/public/primat-products'
       preLoaderRoute: typeof ApiPublicPrimatProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/gmaps': {
+      id: '/api/public/gmaps'
+      path: '/api/public/gmaps'
+      fullPath: '/api/public/gmaps'
+      preLoaderRoute: typeof ApiPublicGmapsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -160,19 +200,11 @@ const rootRouteChildren: RootRouteChildren = {
   AlertsRoute: AlertsRoute,
   FavoritesRoute: FavoritesRoute,
   SearchRoute: SearchRoute,
+  MapIdRoute: MapIdRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiPublicGmapsRoute: ApiPublicGmapsRoute,
   ApiPublicPrimatProductsRoute: ApiPublicPrimatProductsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

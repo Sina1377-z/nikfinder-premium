@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, MapPin } from "lucide-react";
 import { AgeGate } from "@/components/AgeGate";
 import { BottomNav } from "@/components/BottomNav";
@@ -9,6 +9,8 @@ import { PRODUCTS, type Category } from "@/lib/products";
 import { usePrimatSearch } from "@/lib/usePrimatSearch";
 import { useAgeGate } from "@/lib/favorites";
 import { useGeolocation } from "@/lib/useGeolocation";
+import { reverseGeocodeCity } from "@/lib/googleMaps";
+import { useStoreEnrichment } from "@/lib/useStoreEnrichment";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -24,12 +26,24 @@ function Home() {
   const [showFilters, setShowFilters] = useState(false);
 
   const api = usePrimatSearch(query);
-  // Requests location once (background); available app-wide via getGeolocation().
-  useGeolocation();
+  const geo = useGeolocation();
+  const [city, setCity] = useState<string>("Locating…");
+
+  useEffect(() => {
+    if (geo.status === "denied") setCity("Location off");
+    else if (geo.status === "unavailable" || geo.status === "error") setCity("Unavailable");
+    else if (geo.latitude != null && geo.longitude != null) {
+      reverseGeocodeCity(geo.latitude, geo.longitude).then((c) => c && setCity(c));
+    }
+  }, [geo.status, geo.latitude, geo.longitude]);
+
   const hasQuery = query.trim().length > 0;
+  const apiProducts = api.data?.products ?? [];
+  const userPoint = geo.latitude != null && geo.longitude != null ? { lat: geo.latitude, lng: geo.longitude } : null;
+  const enrichVersion = useStoreEnrichment(apiProducts, userPoint);
 
   const results = useMemo(() => {
-    let list: typeof PRODUCTS = hasQuery ? api.data?.products ?? [] : PRODUCTS;
+    let list: typeof PRODUCTS = hasQuery ? apiProducts : PRODUCTS;
     if (category !== "all") list = list.filter((p) => p.category === category);
     const arr = [...list];
     if (sort === "price-asc")
@@ -40,7 +54,8 @@ function Home() {
       arr.sort((a, b) => Math.min(...a.listings.map((l) => l.distanceKm)) - Math.min(...b.listings.map((l) => l.distanceKm)));
     if (sort === "strength") arr.sort((a, b) => b.strengthMg - a.strengthMg);
     return arr;
-  }, [category, hasQuery, api.data, sort]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, hasQuery, apiProducts, sort, enrichVersion]);
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -55,7 +70,7 @@ function Home() {
             </Link>
             <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] text-muted-foreground">
               <MapPin className="size-3.5 text-primary" strokeWidth={2.5} />
-              Stockholm
+              {city}
             </div>
           </div>
 
