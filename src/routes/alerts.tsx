@@ -46,7 +46,7 @@ function Alerts() {
                     params={{ id: p.id }}
                     className="flex items-center gap-4 rounded-3xl border border-border bg-card/50 p-3 transition-colors active:bg-card"
                   >
-                    <img src={p.image} alt={p.name} loading="lazy" width={80} height={80} className="size-16 shrink-0 rounded-2xl object-cover" />
+                    {p.image && <img src={p.image} alt={p.name} loading="lazy" width={80} height={80} className="size-16 shrink-0 rounded-2xl object-cover" />}
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-mono uppercase tracking-widest text-primary">{p.brand}</p>
                       <p className="truncate text-sm font-semibold">{p.name}</p>

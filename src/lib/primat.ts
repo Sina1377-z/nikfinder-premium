@@ -1,30 +1,14 @@
-// Primat API integration.
-// Modular wrapper around the Primat demo endpoint. Swap `PRIMAT_ENDPOINT`
-// for the full production endpoint later without touching the UI.
-
+// Primat demo integration. Discovery queries are deliberately centralised so
+// the demo catalog can be expanded without changing the UI.
 import type { Category, Product, Stock, Store } from "@/lib/products";
 import { STORES } from "@/lib/products";
-
-import pouchMintWhite from "@/assets/pouch-mint-white.jpg";
-import pouchBlack from "@/assets/pouch-black.jpg";
-import pouchBlue from "@/assets/pouch-blue.jpg";
-import pouchRed from "@/assets/pouch-red.jpg";
-import pouchOrange from "@/assets/pouch-orange.jpg";
-import pouchGreen from "@/assets/pouch-green.jpg";
-import pouchClassicBrown from "@/assets/pouch-classic-brown.jpg";
-import cigRed from "@/assets/cig-red.jpg";
-import cigBlue from "@/assets/cig-blue.jpg";
-import cigBlack from "@/assets/cig-black.jpg";
-import vapeBlack from "@/assets/vape-black.jpg";
-import vapePurple from "@/assets/vape-purple.jpg";
-import vapeMint from "@/assets/vape-mint.jpg";
-import vapeRed from "@/assets/vape-red.jpg";
-
 import { chainLabel } from "@/lib/googleMaps";
+import { getVerifiedProductImage } from "@/lib/product-images";
+export { PRIMAT_DISCOVERY_QUERIES } from "@/lib/primat-discovery";
 
 const PRIMAT_ENDPOINT = "/api/public/primat-products";
 
-type PrimatItem = {
+export type PrimatItem = {
   chain?: string;
   store_id?: string;
   product_id?: string;
@@ -37,11 +21,7 @@ type PrimatItem = {
   available?: boolean;
   image?: string;
   image_url?: string;
-  prices?: {
-    regular?: number;
-    effective?: number;
-    comparison?: { price?: number; unit?: string };
-  };
+  prices?: { regular?: number; effective?: number; comparison?: { price?: number; unit?: string } };
   urls?: { primat?: string; source?: string };
 };
 
@@ -61,9 +41,7 @@ export function allCachedPrimatProducts(): Product[] {
   return Array.from(productCache.values());
 }
 
-// --- Nicotine filter --------------------------------------------------------
-// Future-proof: match by category path segments AND product/brand keywords.
-const NIC_CATEGORY_TOKENS = [
+const NICOTINE_TOKENS = [
   "snus",
   "nikotin",
   "nicotine",
@@ -72,79 +50,98 @@ const NIC_CATEGORY_TOKENS = [
   "cigarett",
   "cigarr",
   "cigar",
-  "cigarill",
   "vape",
   "vaping",
   "e-cig",
   "ecig",
-  "e-cigarett",
   "pod",
   "e-vätska",
-  "e-vatska",
   "e-liquid",
-  "eliquid",
-  "vape juice",
-  "nikotinpås",
-  "nikotinpas",
-  "pouches",
   "iqos",
   "heets",
   "terea",
-  "heated",
-  "shisha",
-  "pipe",
-  "pipa",
-  "rolling",
   "rulltobak",
-  "portionssnus",
-  "loose tobacco",
-  "gum",
-  "tuggummi",
-  "lozenge",
-  "spray",
+  "nikotinpås",
+  "pouches",
+  "nicorette",
+];
+const NICOTINE_BRANDS = [
+  "velo",
+  "zyn",
+  "loop",
+  "xqs",
+  "helwit",
+  "kelly white",
+  "skruf",
+  "knox",
+  "general",
+  "lundgren",
+  "ettan",
+  "grov",
+  "vont",
+  "vuse",
+  "elf bar",
+  "lost mary",
+  "rev pod",
+  "nicorette",
+  "marlboro",
+  "camel",
+  "lucky strike",
+  "prince",
+  "chesterfield",
+];
+const ACCESSORY_TOKENS = [
+  "cigarettpapper",
+  "cigarett papper",
+  "cigaretthyls",
+  "filterhyls",
+  "filter",
+  "tändare",
+  "tobakspapper",
+  "rullpapper",
+  "rolling paper",
+  "tubes",
+  "tub",
+  "askkopp",
+  "grinder",
 ];
 
-const NIC_BRAND_TOKENS = [
-  "velo", "zyn", "loop", "lundgren", "general", "göteborgs rapé", "goteborgs rape",
-  "skruf", "knox", "fix", "après", "apres", "xqs", "white fox", "ace", "volt",
-  "pablo", "cuba", "dope", "helwit", "swave", "rush", "siberia", "iceberg",
-  "on!", "rogue", "nordic spirit", "elf bar", "lost mary", "vuse", "iqos",
-  "heets", "terea", "kelly white", "ettan", "grov", "catch", "gotlands",
-  "marlboro", "camel", "l&m", "lucky strike", "pall mall", "prince", "chesterfield",
-  "juul", "vaporesso", "voopoo", "smok", "geekvape",
-];
+function normalized(value: string | undefined): string {
+  return (value ?? "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
 
 function isNicotineItem(item: PrimatItem): boolean {
-  const hay = `${item.category ?? ""} ${item.name ?? ""} ${item.brand ?? ""}`.toLowerCase();
-  if (NIC_CATEGORY_TOKENS.some((t) => hay.includes(t))) return true;
-  if (NIC_BRAND_TOKENS.some((t) => hay.includes(t))) return true;
-  return false;
+  const haystack = normalized(`${item.category ?? ""} ${item.name ?? ""} ${item.brand ?? ""}`);
+  if (ACCESSORY_TOKENS.some((token) => haystack.includes(normalized(token)))) return false;
+  return (
+    NICOTINE_TOKENS.some((token) => haystack.includes(normalized(token))) ||
+    NICOTINE_BRANDS.some((brand) => normalized(item.brand) === normalized(brand))
+  );
 }
 
 function inferCategory(raw: string | undefined, name: string): Category {
-  const s = `${raw ?? ""} ${name}`.toLowerCase();
-  if (s.includes("cigarett") || s.includes("cigar")) return "cigarettes";
-  if (s.includes("engångs") || s.includes("engangs") || s.includes("disposable")) return "vape-disposable";
-  if (s.includes("vape") || s.includes("e-cig") || s.includes("ecig") || s.includes("pod")) return "vape-refillable";
+  const value = normalized(`${raw ?? ""} ${name}`);
+  if (value.includes("cigarett") || value.includes("cigar") || value.includes("rulltobak"))
+    return "cigarettes";
+  if (value.includes("engangs") || value.includes("disposable")) return "vape-disposable";
+  if (
+    value.includes("vape") ||
+    value.includes("e cig") ||
+    value.includes("ecig") ||
+    value.includes("pod")
+  )
+    return "vape-refillable";
   return "snus";
 }
 
-const POUCH_IMAGES = [pouchMintWhite, pouchBlue, pouchRed, pouchOrange, pouchGreen, pouchBlack, pouchClassicBrown];
-const CIG_IMAGES = [cigRed, cigBlue, cigBlack];
-const VAPE_IMAGES = [vapeBlack, vapePurple, vapeMint, vapeRed];
-
-function pickImage(cat: Category, seed: string, apiImage?: string): string {
-  if (apiImage && /^https?:\/\//i.test(apiImage)) return apiImage;
-  const pool =
-    cat === "cigarettes" ? CIG_IMAGES : cat.startsWith("vape") ? VAPE_IMAGES : POUCH_IMAGES;
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return pool[h % pool.length];
-}
-
 function extractStrengthMg(text: string): number {
-  const m = text.match(/(\d+(?:[.,]\d+)?)\s*mg/i);
-  return m ? Number(m[1].replace(",", ".")) : 0;
+  const found = text.match(/(\d+(?:[.,]\d+)?)\s*mg(?:\s*\/\s*ml)?/i);
+  return found ? Number(found[1].replace(",", ".")) : 0;
 }
 
 function stockFrom(available: boolean | undefined): Stock {
@@ -154,10 +151,9 @@ function stockFrom(available: boolean | undefined): Stock {
 function ensureStore(chain: string, storeId: string): string {
   const id = `primat:${chain}:${storeId}`;
   if (!STORES[id]) {
-    const label = chainLabel(chain || "primat");
     (STORES as Record<string, Store>)[id] = {
       id,
-      name: `${label} · #${storeId}`,
+      name: `${chainLabel(chain || "primat")} · #${storeId}`,
       hours: "Opening hours unavailable",
       isOpen: true,
       chain,
@@ -166,69 +162,98 @@ function ensureStore(chain: string, storeId: string): string {
   return id;
 }
 
-function mapItem(item: PrimatItem, idx: number): Product {
+// A product_id is merged only with the same normalized brand, name and package.
+// This preserves distinct products even if a retailer reuses an internal id.
+function mergeKey(item: PrimatItem, index: number): string {
+  const productId = item.product_id?.trim();
+  const fingerprint = [
+    normalized(item.brand),
+    normalized(item.name),
+    normalized(item.package ?? `${item.amount ?? ""} ${item.unit ?? ""}`),
+  ].join("|");
+  return productId
+    ? `${productId}|${fingerprint}`
+    : `${item.chain ?? "unknown"}|${item.store_id ?? index}|${fingerprint}`;
+}
+
+function mapGroup(items: PrimatItem[], index: number): Product {
+  const item = items[0];
   const name = item.name ?? "Okänd produkt";
   const brand = item.brand ?? "";
+  const packageText =
+    item.package ?? (item.amount ? `${item.amount} ${item.unit ?? ""}`.trim() : "");
   const category = inferCategory(item.category, name);
-  const chain = item.chain ?? "primat";
-  const storeKey = ensureStore(chain, item.store_id ?? String(idx));
-
-  const price = item.prices?.effective ?? item.prices?.regular ?? 0;
-  const stock = stockFrom(item.available);
-
-  const strengthMg = extractStrengthMg(`${name} ${item.package ?? ""}`);
-  const pkg = item.package ?? (item.amount ? `${item.amount} ${item.unit ?? ""}`.trim() : "");
-
-  const id = `primat-${chain}-${item.store_id ?? "x"}-${item.product_id ?? idx}`;
-
+  const id = `primat-${mergeKey(item, index)}`;
+  const listings = items.map((entry, listingIndex) => ({
+    storeId: ensureStore(entry.chain ?? "primat", entry.store_id ?? String(listingIndex)),
+    price: entry.prices?.effective ?? entry.prices?.regular ?? 0,
+    stock: stockFrom(entry.available),
+    distanceKm: 0,
+  }));
+  const uniqueListings = listings.filter(
+    (listing, listingIndex, all) =>
+      all.findIndex((other) => other.storeId === listing.storeId) === listingIndex,
+  );
+  const strengthMg = extractStrengthMg(`${name} ${packageText}`);
+  const source = item.urls?.source;
+  const sourceHost = source ? new URL(source).hostname : null;
   const product: Product = {
     id,
     name,
     brand,
     category,
     flavor: name,
-    flavorTags: name.toLowerCase().split(/\s+/).filter(Boolean),
-    strength: strengthMg ? `${strengthMg} mg` : pkg || "—",
+    flavorTags: normalized(name).split(" ").filter(Boolean),
+    strength: strengthMg ? `${strengthMg} mg` : packageText || "—",
     strengthMg,
-    format: pkg || "—",
+    format: packageText || "—",
     ingredients: item.category ?? "",
     description:
-      [item.category, pkg, item.urls?.source ? `Källa: ${new URL(item.urls.source).hostname}` : null]
+      [item.category, packageText, sourceHost ? `Källa: ${sourceHost}` : null]
         .filter(Boolean)
         .join(" · ") || `${brand} ${name}`,
-    image: pickImage(category, id, item.image ?? item.image_url),
-    listings: [
-      {
-        storeId: storeKey,
-        price,
-        stock,
-        distanceKm: 0,
-      },
-    ],
+    image: getVerifiedProductImage(item.product_id),
+    listings: uniqueListings,
   };
-
   productCache.set(id, product);
   return product;
 }
 
-export type PrimatSearchResult = {
-  products: Product[];
-  note?: string;
-  count: number;
-};
+export function mergePrimatItems(items: PrimatItem[]): Product[] {
+  const groups = new Map<string, PrimatItem[]>();
+  items.filter(isNicotineItem).forEach((item, index) => {
+    const key = mergeKey(item, index);
+    groups.set(key, [...(groups.get(key) ?? []), item]);
+  });
+  return Array.from(groups.values()).map(mapGroup);
+}
+
+export type PrimatSearchResult = { products: Product[]; note?: string; count: number };
+
+async function requestPrimat(
+  params: URLSearchParams,
+  signal?: AbortSignal,
+): Promise<PrimatSearchResult> {
+  const res = await fetch(`${PRIMAT_ENDPOINT}?${params}`, {
+    signal,
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`Primat API error: ${res.status}`);
+  const json: PrimatResponse = await res.json();
+  const products = mergePrimatItems(json.data ?? []);
+  return { products, note: json.note, count: products.length };
+}
 
 export async function searchPrimatProducts(
   query: string,
   opts: { signal?: AbortSignal } = {},
 ): Promise<PrimatSearchResult> {
   const q = query.trim();
-  if (!q) return { products: [], count: 0 };
+  return q ? requestPrimat(new URLSearchParams({ q }), opts.signal) : { products: [], count: 0 };
+}
 
-  const url = `${PRIMAT_ENDPOINT}?q=${encodeURIComponent(q)}`;
-  const res = await fetch(url, { signal: opts.signal, headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`Primat API error: ${res.status}`);
-  const json: PrimatResponse = await res.json();
-  const items = (json.data ?? []).filter(isNicotineItem);
-  const products = items.map(mapItem);
-  return { products, note: json.note, count: products.length };
+let catalogPromise: Promise<PrimatSearchResult> | null = null;
+export function discoverPrimatProducts(): Promise<PrimatSearchResult> {
+  catalogPromise ??= requestPrimat(new URLSearchParams({ catalog: "1" }));
+  return catalogPromise;
 }

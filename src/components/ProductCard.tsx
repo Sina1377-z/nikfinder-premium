@@ -26,14 +26,16 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
     >
       <div className="relative overflow-hidden rounded-3xl bg-card ring-1 ring-border transition-transform active:scale-[0.98]">
         <div className="relative aspect-square w-full overflow-hidden bg-white">
-          <img
-            src={product.image}
-            alt={product.name}
-            loading="lazy"
-            width={800}
-            height={800}
-            className="h-full w-full object-contain p-6 transition-transform duration-700 group-hover:scale-105"
-          />
+          {product.image && (
+            <img
+              src={product.image}
+              alt={product.name}
+              loading="lazy"
+              width={800}
+              height={800}
+              className="h-full w-full object-contain p-6 transition-transform duration-700 group-hover:scale-105"
+            />
+          )}
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(product.id); }}
             aria-label={fav ? "Remove from favorites" : "Add to favorites"}

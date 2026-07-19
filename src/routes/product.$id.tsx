@@ -101,13 +101,15 @@ function ProductPage() {
 
       <div className="relative">
         <div className="relative aspect-square w-full overflow-hidden bg-white">
-          <img
-            src={product.image}
-            alt={product.name}
-            width={800}
-            height={800}
-            className="h-full w-full object-contain p-10"
-          />
+          {product.image && (
+            <img
+              src={product.image}
+              alt={product.name}
+              width={800}
+              height={800}
+              className="h-full w-full object-contain p-10"
+            />
+          )}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background" />
         </div>
 
