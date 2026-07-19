@@ -20,8 +20,8 @@ import vapePurple from "@/assets/vape-purple.jpg";
 import vapeMint from "@/assets/vape-mint.jpg";
 import vapeRed from "@/assets/vape-red.jpg";
 
-// Primat's demo endpoint doesn't send CORS headers, so browsers block direct calls.
-// Route through our own server route which proxies the request server-side.
+import { chainLabel } from "@/lib/googleMaps";
+
 const PRIMAT_ENDPOINT = "/api/public/primat-products";
 
 type PrimatItem = {
@@ -53,17 +53,79 @@ type PrimatResponse = {
   data?: PrimatItem[];
 };
 
-// Runtime cache so /product/$id can render products that came from the API.
 const productCache = new Map<string, Product>();
 export function getCachedPrimatProduct(id: string): Product | undefined {
   return productCache.get(id);
 }
+export function allCachedPrimatProducts(): Product[] {
+  return Array.from(productCache.values());
+}
+
+// --- Nicotine filter --------------------------------------------------------
+// Future-proof: match by category path segments AND product/brand keywords.
+const NIC_CATEGORY_TOKENS = [
+  "snus",
+  "nikotin",
+  "nicotine",
+  "tobak",
+  "tobacco",
+  "cigarett",
+  "cigarr",
+  "cigar",
+  "cigarill",
+  "vape",
+  "vaping",
+  "e-cig",
+  "ecig",
+  "e-cigarett",
+  "pod",
+  "e-vätska",
+  "e-vatska",
+  "e-liquid",
+  "eliquid",
+  "vape juice",
+  "nikotinpås",
+  "nikotinpas",
+  "pouches",
+  "iqos",
+  "heets",
+  "terea",
+  "heated",
+  "shisha",
+  "pipe",
+  "pipa",
+  "rolling",
+  "rulltobak",
+  "portionssnus",
+  "loose tobacco",
+  "gum",
+  "tuggummi",
+  "lozenge",
+  "spray",
+];
+
+const NIC_BRAND_TOKENS = [
+  "velo", "zyn", "loop", "lundgren", "general", "göteborgs rapé", "goteborgs rape",
+  "skruf", "knox", "fix", "après", "apres", "xqs", "white fox", "ace", "volt",
+  "pablo", "cuba", "dope", "helwit", "swave", "rush", "siberia", "iceberg",
+  "on!", "rogue", "nordic spirit", "elf bar", "lost mary", "vuse", "iqos",
+  "heets", "terea", "kelly white", "ettan", "grov", "catch", "gotlands",
+  "marlboro", "camel", "l&m", "lucky strike", "pall mall", "prince", "chesterfield",
+  "juul", "vaporesso", "voopoo", "smok", "geekvape",
+];
+
+function isNicotineItem(item: PrimatItem): boolean {
+  const hay = `${item.category ?? ""} ${item.name ?? ""} ${item.brand ?? ""}`.toLowerCase();
+  if (NIC_CATEGORY_TOKENS.some((t) => hay.includes(t))) return true;
+  if (NIC_BRAND_TOKENS.some((t) => hay.includes(t))) return true;
+  return false;
+}
 
 function inferCategory(raw: string | undefined, name: string): Category {
   const s = `${raw ?? ""} ${name}`.toLowerCase();
-  if (s.includes("cigarett")) return "cigarettes";
-  if (s.includes("engångs") || s.includes("disposable")) return "vape-disposable";
-  if (s.includes("vape") || s.includes("e-cig") || s.includes("pod")) return "vape-refillable";
+  if (s.includes("cigarett") || s.includes("cigar")) return "cigarettes";
+  if (s.includes("engångs") || s.includes("engangs") || s.includes("disposable")) return "vape-disposable";
+  if (s.includes("vape") || s.includes("e-cig") || s.includes("ecig") || s.includes("pod")) return "vape-refillable";
   return "snus";
 }
 
@@ -92,14 +154,13 @@ function stockFrom(available: boolean | undefined): Stock {
 function ensureStore(chain: string, storeId: string): string {
   const id = `primat:${chain}:${storeId}`;
   if (!STORES[id]) {
-    const label = chain
-      ? chain.charAt(0).toUpperCase() + chain.slice(1)
-      : "Butik";
+    const label = chainLabel(chain || "primat");
     (STORES as Record<string, Store>)[id] = {
       id,
       name: `${label} · #${storeId}`,
-      hours: "Se butik för öppettider",
+      hours: "Opening hours unavailable",
       isOpen: true,
+      chain,
     };
   }
   return id;
@@ -167,7 +228,7 @@ export async function searchPrimatProducts(
   const res = await fetch(url, { signal: opts.signal, headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`Primat API error: ${res.status}`);
   const json: PrimatResponse = await res.json();
-  const items = json.data ?? [];
+  const items = (json.data ?? []).filter(isNicotineItem);
   const products = items.map(mapItem);
-  return { products, note: json.note, count: json.count ?? products.length };
+  return { products, note: json.note, count: products.length };
 }

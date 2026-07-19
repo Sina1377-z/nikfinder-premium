@@ -27,6 +27,13 @@ export type Store = {
   name: string;
   hours: string;
   isOpen: boolean;
+  address?: string;
+  city?: string;
+  chain?: string;
+  lat?: number;
+  lng?: number;
+  placeId?: string;
+  openingHours?: string[];
 };
 
 export type Listing = {
