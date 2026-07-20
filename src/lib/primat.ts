@@ -28,7 +28,8 @@ import vapeMint from "@/assets/vape-mint.jpg";
 import vapeRed from "@/assets/vape-red.jpg";
 
 import { chainLabel } from "@/lib/googleMaps";
-import { getVerifiedPrimatProductImage } from "@/lib/primat-images";
+import { getResolvedPrimatProductImage, getVerifiedPrimatProductImage } from "@/lib/primat-images";
+import { resolveExternalProductImage } from "@/lib/product-image-resolver";
 
 const PRIMAT_ENDPOINT = "/api/public/primat-products";
 
@@ -254,11 +255,15 @@ function pickImage(
   cat: Category,
   seed: string,
   productId: string | undefined,
+  brand: string,
+  name: string,
   apiImage?: string,
 ): string {
   const verifiedImage = getVerifiedPrimatProductImage(productId);
   if (verifiedImage) return verifiedImage;
   if (apiImage && /^https?:\/\//i.test(apiImage)) return apiImage;
+  const resolvedImage = getResolvedPrimatProductImage(productId, brand, name);
+  if (resolvedImage) return resolvedImage;
   const pool =
     cat === "cigarettes" ? CIG_IMAGES : cat.startsWith("vape") ? VAPE_IMAGES : POUCH_IMAGES;
   let h = 0;
@@ -358,7 +363,7 @@ function mapItem(item: PrimatItem, idx: number): Product {
       ]
         .filter(Boolean)
         .join(" · ") || `${brand} ${name}`,
-    image: pickImage(category, id, item.product_id, getPrimatApiImage(item)),
+    image: pickImage(category, id, item.product_id, brand, name, getPrimatApiImage(item)),
     listings: [
       {
         storeId: storeKey,
@@ -388,6 +393,30 @@ export async function searchPrimatProducts(
   const json: PrimatResponse = await res.json();
   const items = (json.data ?? []).filter(isNicotineItem);
   const products = items.map(mapItem);
+
+  // Keep Primat/local images first. Only unresolved products use the separate,
+  // cache-backed external resolver, with a small concurrency limit.
+  const unresolved = items
+    .map((item, index) => ({ item, product: products[index] }))
+    .filter(
+      ({ item }) =>
+        !getVerifiedPrimatProductImage(item.product_id) &&
+        !getPrimatApiImage(item) &&
+        !getResolvedPrimatProductImage(item.product_id, item.brand ?? "", item.name ?? ""),
+    );
+  for (let index = 0; index < unresolved.length; index += 3) {
+    await Promise.all(
+      unresolved.slice(index, index + 3).map(async ({ item, product }) => {
+        const image = await resolveExternalProductImage({
+          sourceUrl: item.urls?.source,
+          brand: product.brand,
+          name: product.name,
+        });
+        if (image) product.image = image;
+      }),
+    );
+  }
+
   return { products, note: json.note, count: products.length };
 }
 

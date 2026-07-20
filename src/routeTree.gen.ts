@@ -17,6 +17,7 @@ import { Route as MapIdRouteImport } from './routes/map.$id'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as ApiPublicGmapsRouteImport } from './routes/api/public/gmaps'
 import { Route as ApiPublicPrimatProductsRouteImport } from './routes/api/public/primat-products'
+import { Route as ApiPublicProductImageRouteImport } from './routes/api/public/product-image'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const ApiPublicPrimatProductsRoute = ApiPublicPrimatProductsRouteImport.update({
   path: '/api/public/primat-products',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicProductImageRoute = ApiPublicProductImageRouteImport.update({
+  id: '/api/public/product-image',
+  path: '/api/public/product-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/product/$id': typeof ProductIdRoute
   '/api/public/gmaps': typeof ApiPublicGmapsRoute
   '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
+  '/api/public/product-image': typeof ApiPublicProductImageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/product/$id': typeof ProductIdRoute
   '/api/public/gmaps': typeof ApiPublicGmapsRoute
   '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
+  '/api/public/product-image': typeof ApiPublicProductImageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/product/$id': typeof ProductIdRoute
   '/api/public/gmaps': typeof ApiPublicGmapsRoute
   '/api/public/primat-products': typeof ApiPublicPrimatProductsRoute
+  '/api/public/product-image': typeof ApiPublicProductImageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/api/public/gmaps'
     | '/api/public/primat-products'
+    | '/api/public/product-image'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/api/public/gmaps'
     | '/api/public/primat-products'
+    | '/api/public/product-image'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/product/$id'
     | '/api/public/gmaps'
     | '/api/public/primat-products'
+    | '/api/public/product-image'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicGmapsRoute: typeof ApiPublicGmapsRoute
   ApiPublicPrimatProductsRoute: typeof ApiPublicPrimatProductsRoute
+  ApiPublicProductImageRoute: typeof ApiPublicProductImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPrimatProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/product-image': {
+      id: '/api/public/product-image'
+      path: '/api/public/product-image'
+      fullPath: '/api/public/product-image'
+      preLoaderRoute: typeof ApiPublicProductImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductIdRoute: ProductIdRoute,
   ApiPublicGmapsRoute: ApiPublicGmapsRoute,
   ApiPublicPrimatProductsRoute: ApiPublicPrimatProductsRoute,
+  ApiPublicProductImageRoute: ApiPublicProductImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
