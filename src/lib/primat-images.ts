@@ -14,12 +14,41 @@ type ResolvedExternalImage = {
 // High-confidence, exact-brand/name matches from retailer product metadata.
 // This is a small cache, not a general image catalogue; future provider images
 // should replace these entries without requiring any UI change.
+//
+// URLs harvested from retailer product pages (og:image / JSON-LD image) and
+// verified against brand + product name before inclusion. The runtime
+// resolver (product-image-resolver.ts) covers the long tail on demand; this
+// map guarantees an instant, correct image for the most frequent hits.
 const RESOLVED_EXTERNAL_PRIMAT_IMAGES: Record<string, ResolvedExternalImage> = {
   "2150199": {
     brand: "Velo",
     name: "Bright Spearmint",
     imageUrl:
-      "https://v3-media-we.northerner.com/uknorthr/images/plytix-6660261305ce00f36843eec8/500/500/fill/n/plytix-6660261305ce00f36843eec8-png.png",
+      "https://handlaprivatkund.ica.se/images-v3/bf7a00ca-390e-4769-865f-dc369586872e/c6d8d97e-cbd0-40a8-bcef-c212fd07f3a7/300x300.jpg",
+  },
+  "2105984": {
+    brand: "Velo",
+    name: "Cool Storm",
+    imageUrl:
+      "https://handlaprivatkund.ica.se/images-v3/bf7a00ca-390e-4769-865f-dc369586872e/4433e2c4-4ca4-457c-8283-929a4c502b01/300x300.jpg",
+  },
+  "2031469": {
+    brand: "Skruf",
+    name: "Portionssnus Stark",
+    imageUrl:
+      "https://handlaprivatkund.ica.se/images-v3/bf7a00ca-390e-4769-865f-dc369586872e/ab15502d-0ea7-4529-ae94-51e61f986957/300x300.jpg",
+  },
+  "2792843": {
+    brand: "",
+    name: "White fox",
+    imageUrl:
+      "https://handlaprivatkund.ica.se/images-v3/bf7a00ca-390e-4769-865f-dc369586872e/dfbfe322-cac4-4a8f-bfe4-a62ad55540b9/300x300.jpg",
+  },
+  "4001566": {
+    brand: "Helwit",
+    name: "Banana Extra Strong",
+    imageUrl:
+      "https://handlaprivatkund.ica.se/images-v3/bf7a00ca-390e-4769-865f-dc369586872e/2f76e6b9-a22a-4a59-8cb5-b46299258873/300x300.jpg",
   },
   "101855121_ST": {
     brand: "ZYN",
