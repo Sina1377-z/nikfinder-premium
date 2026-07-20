@@ -18,9 +18,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="font-display text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          That page doesn't exist.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">That page doesn't exist.</p>
         <div className="mt-6">
           <Link
             to="/"
@@ -48,7 +46,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">Try again or return home.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
           >
             Try again
@@ -67,10 +68,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "NikFinder — Find nicotine products nearby" },
-      { name: "description", content: "Compare prices, check stock and find nicotine products in stores near you. For adults 18+ only." },
+      { title: "NikFinder TEST BUILD — Find nicotine products nearby" },
+      {
+        name: "description",
+        content:
+          "Compare prices, check stock and find nicotine products in stores near you. For adults 18+ only.",
+      },
       { property: "og:title", content: "NikFinder — Find nicotine products nearby" },
-      { property: "og:description", content: "Compare prices, check stock and find nicotine products in stores near you." },
+      {
+        property: "og:description",
+        content: "Compare prices, check stock and find nicotine products in stores near you.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#09090b" },

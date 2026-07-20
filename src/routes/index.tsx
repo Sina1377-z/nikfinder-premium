@@ -83,13 +83,18 @@ function Home() {
   return (
     <div className="min-h-screen bg-background pb-28">
       {verified === false && <AgeGate onConfirm={confirm} />}
+      <div className="bg-red-600 px-4 py-1 text-center text-xs font-semibold text-white">
+        TEST BUILD - REMOVE AFTER VERIFICATION
+      </div>
 
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-2xl">
         <div className="mx-auto max-w-lg px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-4">
           <div className="mb-5 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-primary shadow-[0_0_12px] shadow-primary/60" />
-              <h1 className="font-display text-xl font-extrabold tracking-tight">NikFinder</h1>
+              <h1 className="font-display text-xl font-extrabold tracking-tight">
+                NikFinder TEST BUILD
+              </h1>
             </Link>
             <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] text-muted-foreground">
               <MapPin className="size-3.5 text-primary" strokeWidth={2.5} />
