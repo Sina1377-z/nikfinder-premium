@@ -2,16 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_SOURCE_LENGTH = 500;
-const ALLOWED_SOURCE_HOSTS = new Set([
-  "hemkop.se",
-  "www.hemkop.se",
-  "ica.se",
-  "www.ica.se",
-  "coop.se",
-  "www.coop.se",
-  "willys.se",
-  "www.willys.se",
-]);
 
 type CachedImage = { expiresAt: number; imageUrl: string | null };
 type ImageCandidate = { url: string; area: number };
@@ -98,15 +88,27 @@ function parseJsonLd(html: string): ProductMetadata[] {
   return metadata;
 }
 
+function decodeHtml(value: string): string {
+  return value
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) =>
+      String.fromCodePoint(Number.parseInt(code, 16)),
+    )
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 10)))
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"');
+}
+
+function attribute(tag: string, name: string): string | undefined {
+  const match = tag.match(new RegExp(`\\b${name}=["']([^"']+)["']`, "i"));
+  return match?.[1] ? decodeHtml(match[1]) : undefined;
+}
+
 function metaContent(html: string, property: string): string | undefined {
-  const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = html.match(
-    new RegExp(
-      `<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']+)["'][^>]*>`,
-      "i",
-    ),
-  );
-  return match?.[1];
+  const metaTags = html.match(/<meta\b[^>]*>/gi) ?? [];
+  const tag = metaTags
+    .find((tag) => attribute(tag, "property") === property || attribute(tag, "name") === property)
+    ?.match(/\bcontent=["']([^"']+)["']/i)?.[1];
+  return tag ? decodeHtml(tag).trim() : undefined;
 }
 
 function resolveImageFromMetadata(html: string, name: string, brand: string): string | null {
@@ -130,7 +132,12 @@ function validSource(value: string): URL | null {
   if (value.length > MAX_SOURCE_LENGTH) return null;
   try {
     const source = new URL(value);
-    return source.protocol === "https:" && ALLOWED_SOURCE_HOSTS.has(source.hostname)
+    const host = source.hostname.toLocaleLowerCase("en-US");
+    const privateIpv4 = /^(127|10)\.|^192\.168\.|^172\.(1[6-9]|2\d|3[0-1])\./.test(host);
+    return source.protocol === "https:" &&
+      host !== "localhost" &&
+      !host.endsWith(".local") &&
+      !privateIpv4
       ? source
       : null;
   } catch {

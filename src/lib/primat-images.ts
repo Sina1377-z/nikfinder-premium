@@ -15,6 +15,30 @@ type ResolvedExternalImage = {
 // This is a small cache, not a general image catalogue; future provider images
 // should replace these entries without requiring any UI change.
 const RESOLVED_EXTERNAL_PRIMAT_IMAGES: Record<string, ResolvedExternalImage> = {
+  "2150199": {
+    brand: "Velo",
+    name: "Bright Spearmint",
+    imageUrl:
+      "https://v3-media-we.northerner.com/uknorthr/images/plytix-6660261305ce00f36843eec8/500/500/fill/n/plytix-6660261305ce00f36843eec8-png.png",
+  },
+  "101855121_ST": {
+    brand: "ZYN",
+    name: "Black Cherry Slim",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6968bb27d12f96271c5e9804/500/500/fill/n/plytix-6968bb27d12f96271c5e9804-png.png",
+  },
+  "101543266_ST": {
+    brand: "XQS",
+    name: "Wintergreen",
+    imageUrl:
+      "https://v3-media-we.haypp.com/ukhaypp/images/plytix-6a01a7fde37a8b83f7ebc75d/500/500/fill/n/plytix-6a01a7fde37a8b83f7ebc75d-png.png",
+  },
+  "101543291_ST": {
+    brand: "XQS",
+    name: "Wintergreen",
+    imageUrl:
+      "https://v3-media-we.haypp.com/ukhaypp/images/plytix-6a01a7fde37a8b83f7ebc75d/500/500/fill/n/plytix-6a01a7fde37a8b83f7ebc75d-png.png",
+  },
   "101584140_ST": {
     brand: "Vont",
     name: "Cube Cherry Berry",
