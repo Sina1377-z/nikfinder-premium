@@ -1,0 +1,36 @@
+// These broad categories and nicotine brands are intentionally explicit so the
+// demonstration catalog can be expanded without changing the API route or UI.
+export const PRIMAT_DISCOVERY_QUERIES = [
+  "snus",
+  "nikotin",
+  "nikotinpåsar",
+  "tobak",
+  "vitt snus",
+  "portionssnus",
+  "cigaretter",
+  "rulltobak",
+  "vape",
+  "e-cigarett",
+  "e-cigg",
+  "pod",
+  "velo",
+  "zyn",
+  "loop",
+  "xqs",
+  "helwit",
+  "kelly white",
+  "skruf",
+  "knox",
+  "general",
+  "lundgrens",
+  "ettan",
+  "grov",
+  "vont",
+  "vuse",
+  "elf bar",
+  "lost mary",
+  "rev pod",
+  "nicorette",
+] as const;
+
+export const MAX_CONCURRENT_PRIMAT_DISCOVERY_REQUESTS = 3;

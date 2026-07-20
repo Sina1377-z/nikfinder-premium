@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { PRODUCTS, type Category } from "@/lib/products";
 import { usePrimatSearch } from "@/lib/usePrimatSearch";
+import { usePrimatCatalog } from "@/lib/usePrimatCatalog";
 import { useAgeGate } from "@/lib/favorites";
 import { useGeolocation } from "@/lib/useGeolocation";
 import { reverseGeocodeCity } from "@/lib/googleMaps";
@@ -26,6 +27,7 @@ function Home() {
   const [showFilters, setShowFilters] = useState(false);
 
   const api = usePrimatSearch(query);
+  const catalog = usePrimatCatalog();
   const geo = useGeolocation();
   const [city, setCity] = useState<string>("Locating…");
 
@@ -39,23 +41,43 @@ function Home() {
 
   const hasQuery = query.trim().length > 0;
   const apiProducts = api.data?.products ?? [];
-  const userPoint = geo.latitude != null && geo.longitude != null ? { lat: geo.latitude, lng: geo.longitude } : null;
-  const enrichVersion = useStoreEnrichment(apiProducts, userPoint);
+  const catalogProducts = useMemo(() => {
+    const productsById = new Map(PRODUCTS.map((product) => [product.id, product]));
+    catalog.products.forEach((product) => {
+      if (!productsById.has(product.id)) productsById.set(product.id, product);
+    });
+    return Array.from(productsById.values());
+  }, [catalog.products]);
+  const userPoint =
+    geo.latitude != null && geo.longitude != null
+      ? { lat: geo.latitude, lng: geo.longitude }
+      : null;
+  const enrichVersion = useStoreEnrichment(hasQuery ? apiProducts : catalogProducts, userPoint);
 
   const results = useMemo(() => {
-    let list: typeof PRODUCTS = hasQuery ? apiProducts : PRODUCTS;
+    let list = hasQuery ? apiProducts : catalogProducts;
     if (category !== "all") list = list.filter((p) => p.category === category);
     const arr = [...list];
     if (sort === "price-asc")
-      arr.sort((a, b) => Math.min(...a.listings.map((l) => l.price)) - Math.min(...b.listings.map((l) => l.price)));
+      arr.sort(
+        (a, b) =>
+          Math.min(...a.listings.map((l) => l.price)) - Math.min(...b.listings.map((l) => l.price)),
+      );
     if (sort === "price-desc")
-      arr.sort((a, b) => Math.min(...b.listings.map((l) => l.price)) - Math.min(...a.listings.map((l) => l.price)));
+      arr.sort(
+        (a, b) =>
+          Math.min(...b.listings.map((l) => l.price)) - Math.min(...a.listings.map((l) => l.price)),
+      );
     if (sort === "distance")
-      arr.sort((a, b) => Math.min(...a.listings.map((l) => l.distanceKm)) - Math.min(...b.listings.map((l) => l.distanceKm)));
+      arr.sort(
+        (a, b) =>
+          Math.min(...a.listings.map((l) => l.distanceKm)) -
+          Math.min(...b.listings.map((l) => l.distanceKm)),
+      );
     if (sort === "strength") arr.sort((a, b) => b.strengthMg - a.strengthMg);
     return arr;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, hasQuery, apiProducts, sort, enrichVersion]);
+  }, [category, hasQuery, apiProducts, catalogProducts, sort, enrichVersion]);
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -86,7 +108,9 @@ function Home() {
               onClick={() => setShowFilters((v) => !v)}
               aria-label="Filters"
               className={`absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-xl transition-colors ${
-                showFilters ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                showFilters
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <SlidersHorizontal className="size-4" />
@@ -125,7 +149,9 @@ function Home() {
       <main className="mx-auto max-w-lg px-5 pt-6">
         <div className="mb-4 flex items-baseline justify-between">
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-primary">Nearby now</p>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-primary">
+              Nearby now
+            </p>
             <h2 className="font-display text-2xl font-bold">
               {query ? "Results" : "Available around you"}
             </h2>
@@ -139,7 +165,9 @@ function Home() {
           </div>
         ) : hasQuery && api.error ? (
           <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
-            <p className="text-sm text-muted-foreground">Couldn't reach the catalog. Please try again.</p>
+            <p className="text-sm text-muted-foreground">
+              Couldn't reach the catalog. Please try again.
+            </p>
           </div>
         ) : results.length === 0 ? (
           <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
