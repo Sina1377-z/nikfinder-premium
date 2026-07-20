@@ -79,8 +79,16 @@ type PrimatItem = {
   unit?: string;
   package?: string;
   available?: boolean;
-  image?: string;
-  image_url?: string;
+  image?: ImageValue;
+  image_url?: ImageValue;
+  imageUrl?: ImageValue;
+  imageURL?: ImageValue;
+  thumbnail?: ImageValue;
+  picture?: ImageValue;
+  photo?: ImageValue;
+  media?: ImageValue;
+  images?: ImageValue;
+  productImage?: ImageValue;
   prices?: {
     regular?: number;
     effective?: number;
@@ -88,6 +96,18 @@ type PrimatItem = {
   };
   urls?: { primat?: string; source?: string };
 };
+
+type ImageObject = {
+  url?: string;
+  src?: string;
+  image_url?: string;
+  imageUrl?: string;
+  imageURL?: string;
+  width?: number;
+  height?: number;
+};
+
+type ImageValue = string | ImageObject | Array<string | ImageObject>;
 
 type PrimatResponse = {
   demo?: boolean;
@@ -246,6 +266,40 @@ function pickImage(
   return pool[h % pool.length];
 }
 
+type ImageCandidate = { url: string; area: number };
+
+function collectImageCandidates(value: ImageValue | undefined): ImageCandidate[] {
+  const values = Array.isArray(value) ? value : [value];
+  return values.flatMap((entry) => {
+    if (typeof entry === "string") {
+      return /^https?:\/\//i.test(entry) ? [{ url: entry, area: 0 }] : [];
+    }
+    if (!entry) return [];
+    const url = entry.url ?? entry.src ?? entry.image_url ?? entry.imageUrl ?? entry.imageURL;
+    if (!url || !/^https?:\/\//i.test(url)) return [];
+    const width = typeof entry.width === "number" && Number.isFinite(entry.width) ? entry.width : 0;
+    const height =
+      typeof entry.height === "number" && Number.isFinite(entry.height) ? entry.height : 0;
+    return [{ url, area: width * height }];
+  });
+}
+
+function getPrimatApiImage(item: PrimatItem): string | undefined {
+  const candidates = [
+    item.image_url,
+    item.imageUrl,
+    item.imageURL,
+    item.image,
+    item.productImage,
+    item.images,
+    item.media,
+    item.thumbnail,
+    item.picture,
+    item.photo,
+  ].flatMap(collectImageCandidates);
+  return candidates.sort((a, b) => b.area - a.area)[0]?.url;
+}
+
 function extractStrengthMg(text: string): number {
   const m = text.match(/(\d+(?:[.,]\d+)?)\s*mg/i);
   return m ? Number(m[1].replace(",", ".")) : 0;
@@ -304,7 +358,7 @@ function mapItem(item: PrimatItem, idx: number): Product {
       ]
         .filter(Boolean)
         .join(" · ") || `${brand} ${name}`,
-    image: pickImage(category, id, item.product_id, item.image ?? item.image_url),
+    image: pickImage(category, id, item.product_id, getPrimatApiImage(item)),
     listings: [
       {
         storeId: storeKey,
