@@ -9,6 +9,9 @@ export type GeoState = {
 };
 
 const STORAGE_KEY = "nikfinder:geo";
+const LOCATION_CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+
+type StoredGeoState = GeoState & { savedAt?: number };
 
 // Module-level singleton so the location is available anywhere in the app
 // without prop drilling and is requested only once per session.
@@ -20,7 +23,7 @@ function emit(next: GeoState) {
   cached = next;
   try {
     if (next.latitude != null && next.longitude != null) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...next, savedAt: Date.now() }));
     }
   } catch {
     // ignore
@@ -36,9 +39,12 @@ function loadCached(): GeoState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as GeoState;
-      cached = { ...parsed, status: "granted", error: null };
-      return cached;
+      const parsed = JSON.parse(raw) as StoredGeoState;
+      if (parsed.savedAt && Date.now() - parsed.savedAt <= LOCATION_CACHE_MAX_AGE_MS) {
+        cached = { ...parsed, status: "granted", error: null };
+        return cached;
+      }
+      localStorage.removeItem(STORAGE_KEY);
     }
   } catch {
     // ignore
@@ -53,7 +59,13 @@ export function requestGeolocation() {
   requested = true;
 
   if (!("geolocation" in navigator)) {
-    emit({ latitude: null, longitude: null, accuracy: null, status: "unavailable", error: "Geolocation not supported" });
+    emit({
+      latitude: null,
+      longitude: null,
+      accuracy: null,
+      status: "unavailable",
+      error: "Geolocation not supported",
+    });
     return;
   }
 
@@ -108,6 +120,8 @@ export function distanceKm(
   const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);
   const dLon = toRad(b.lon - a.lon);
-  const s1 = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2;
+  const s1 =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(s1));
 }
