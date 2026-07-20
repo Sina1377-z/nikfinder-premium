@@ -71,10 +71,17 @@ export function getResolvedPrimatProductImage(
   brand: string,
   name: string,
 ): string | undefined {
-  if (!productId) return undefined;
-  const image = RESOLVED_EXTERNAL_PRIMAT_IMAGES[productId];
-  if (!image) return undefined;
   const actual = normalize(`${brand} ${name}`);
+  const image =
+    (productId ? RESOLVED_EXTERNAL_PRIMAT_IMAGES[productId] : undefined) ??
+    Object.values(RESOLVED_EXTERNAL_PRIMAT_IMAGES).find(
+      (candidate) =>
+        normalize(brand) === normalize(candidate.brand) &&
+        normalize(candidate.name)
+          .split(" ")
+          .every((term) => actual.includes(term)),
+    );
+  if (!image) return undefined;
   return normalize(brand) === normalize(image.brand) &&
     normalize(image.name)
       .split(" ")

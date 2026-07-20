@@ -11,6 +11,7 @@ import { useAgeGate } from "@/lib/favorites";
 import { useGeolocation } from "@/lib/useGeolocation";
 import { reverseGeocodeCity } from "@/lib/googleMaps";
 import { useStoreEnrichment } from "@/lib/useStoreEnrichment";
+import { getResolvedPrimatProductImage } from "@/lib/primat-images";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -39,6 +40,15 @@ function Home() {
 
   const hasQuery = query.trim().length > 0;
   const apiProducts = api.data?.products ?? [];
+  const homepageProducts = useMemo(
+    () =>
+      PRODUCTS.map((product) => ({
+        ...product,
+        image:
+          getResolvedPrimatProductImage(undefined, product.brand, product.name) ?? product.image,
+      })),
+    [],
+  );
   const userPoint =
     geo.latitude != null && geo.longitude != null
       ? { lat: geo.latitude, lng: geo.longitude }
@@ -46,7 +56,7 @@ function Home() {
   const enrichVersion = useStoreEnrichment(apiProducts, userPoint);
 
   const results = useMemo(() => {
-    let list: typeof PRODUCTS = hasQuery ? apiProducts : PRODUCTS;
+    let list: typeof PRODUCTS = hasQuery ? apiProducts : homepageProducts;
     if (category !== "all") list = list.filter((p) => p.category === category);
     const arr = [...list];
     if (sort === "price-asc")
@@ -68,7 +78,7 @@ function Home() {
     if (sort === "strength") arr.sort((a, b) => b.strengthMg - a.strengthMg);
     return arr;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, hasQuery, apiProducts, sort, enrichVersion]);
+  }, [category, hasQuery, apiProducts, homepageProducts, sort, enrichVersion]);
 
   return (
     <div className="min-h-screen bg-background pb-28">
