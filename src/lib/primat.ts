@@ -31,6 +31,42 @@ import { chainLabel } from "@/lib/googleMaps";
 
 const PRIMAT_ENDPOINT = "/api/public/primat-products";
 
+const DEMO_QUERY_ALIASES: Record<string, string> = {
+  "nicotine pouch": "white snus",
+  "nicotine pouches": "white snus",
+  nikotinpas: "white snus",
+  nikotinpasar: "white snus",
+  nikotinpasarna: "white snus",
+  pouches: "white snus",
+  "white snus": "white snus",
+  "vitt snus": "white snus",
+  "e cigarette": "e-cigarett",
+  "e cigarettes": "e-cigarett",
+  ecig: "e-cigarett",
+  ecigs: "e-cigarett",
+  "e cigg": "e-cigarett",
+  "e ciggs": "e-cigarett",
+  cigarette: "cigaretter",
+  cigarettes: "cigaretter",
+  cigg: "cigaretter",
+  ciggs: "cigaretter",
+};
+
+function normalizedQuery(query: string): string {
+  return query
+    .trim()
+    .toLocaleLowerCase("sv-SE")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+export function normalizePrimatSearchQuery(query: string): string {
+  const normalized = normalizedQuery(query);
+  return DEMO_QUERY_ALIASES[normalized] ?? query.trim();
+}
+
 type PrimatItem = {
   chain?: string;
   store_id?: string;
@@ -281,7 +317,7 @@ export async function searchPrimatProducts(
   query: string,
   opts: { signal?: AbortSignal } = {},
 ): Promise<PrimatSearchResult> {
-  const q = query.trim();
+  const q = normalizePrimatSearchQuery(query);
   if (!q) return { products: [], count: 0 };
 
   const url = `${PRIMAT_ENDPOINT}?q=${encodeURIComponent(q)}`;
