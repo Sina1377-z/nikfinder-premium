@@ -971,10 +971,27 @@ export function smartSearch(products: Product[], q: string): Product[] {
     .map((x) => x.p);
 }
 
-export type Suggestion = { label: string; kind: "brand" | "flavor" | "product" };
+export type Suggestion = { label: string; kind: "brand" | "flavor" | "product" | "category" };
+
+const PRODUCT_TYPE_SUGGESTIONS: Array<{ label: string; queries: string[] }> = [
+  {
+    label: "Nicotine pouches",
+    queries: ["snus", "nicotine pouch", "nicotine pouches", "nikotinpasar", "white snus"],
+  },
+  { label: "Vape", queries: ["vape", "vapes", "e cigarette", "e cigg", "ecig"] },
+  { label: "Cigarettes", queries: ["cigarette", "cigarettes", "cigaretter", "cigg"] },
+];
+
+function normalizeSearchText(value: string): string {
+  return value
+    .trim()
+    .toLocaleLowerCase("sv-SE")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
 
 export function autocomplete(q: string, limit = 8): Suggestion[] {
-  const query = q.trim().toLowerCase();
+  const query = normalizeSearchText(q);
   if (!query) return [];
   const out: Suggestion[] = [];
   const seen = new Set<string>();
@@ -984,10 +1001,15 @@ export function autocomplete(q: string, limit = 8): Suggestion[] {
     seen.add(key);
     out.push({ label, kind });
   };
-  for (const b of ALL_BRANDS) if (b.toLowerCase().includes(query)) add(b, "brand");
-  for (const t of ALL_FLAVOR_TAGS) if (t.includes(query)) add(t, "flavor");
+  for (const type of PRODUCT_TYPE_SUGGESTIONS) {
+    if (type.queries.some((term) => term.includes(query) || query.includes(term))) {
+      add(type.label, "category");
+    }
+  }
+  for (const b of ALL_BRANDS) if (normalizeSearchText(b).includes(query)) add(b, "brand");
+  for (const t of ALL_FLAVOR_TAGS) if (normalizeSearchText(t).includes(query)) add(t, "flavor");
   for (const p of PRODUCTS)
-    if (p.name.toLowerCase().includes(query)) add(`${p.brand} ${p.name}`, "product");
+    if (normalizeSearchText(p.name).includes(query)) add(`${p.brand} ${p.name}`, "product");
   return out.slice(0, limit);
 }
 

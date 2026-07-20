@@ -37,6 +37,7 @@ const KIND_ICON = {
   brand: Store,
   flavor: Tag,
   product: Package,
+  category: Package,
 };
 
 function SearchPage() {
