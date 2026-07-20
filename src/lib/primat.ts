@@ -28,6 +28,7 @@ import vapeMint from "@/assets/vape-mint.jpg";
 import vapeRed from "@/assets/vape-red.jpg";
 
 import { chainLabel } from "@/lib/googleMaps";
+import { getVerifiedPrimatProductImage } from "@/lib/primat-images";
 
 const PRIMAT_ENDPOINT = "/api/public/primat-products";
 
@@ -229,7 +230,14 @@ const POUCH_IMAGES = [
 const CIG_IMAGES = [cigRed, cigBlue, cigBlack];
 const VAPE_IMAGES = [vapeBlack, vapePurple, vapeMint, vapeRed];
 
-function pickImage(cat: Category, seed: string, apiImage?: string): string {
+function pickImage(
+  cat: Category,
+  seed: string,
+  productId: string | undefined,
+  apiImage?: string,
+): string {
+  const verifiedImage = getVerifiedPrimatProductImage(productId);
+  if (verifiedImage) return verifiedImage;
   if (apiImage && /^https?:\/\//i.test(apiImage)) return apiImage;
   const pool =
     cat === "cigarettes" ? CIG_IMAGES : cat.startsWith("vape") ? VAPE_IMAGES : POUCH_IMAGES;
@@ -296,7 +304,7 @@ function mapItem(item: PrimatItem, idx: number): Product {
       ]
         .filter(Boolean)
         .join(" · ") || `${brand} ${name}`,
-    image: pickImage(category, id, item.image ?? item.image_url),
+    image: pickImage(category, id, item.product_id, item.image ?? item.image_url),
     listings: [
       {
         storeId: storeKey,
