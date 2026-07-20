@@ -9,24 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AlertsRouteImport } from './routes/alerts'
-import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as SearchRouteImport } from './routes/search'
-import { Route as MapIdRouteImport } from './routes/map.$id'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
-import { Route as ApiPublicGmapsRouteImport } from './routes/api/public/gmaps'
-import { Route as ApiPublicPrimatProductsRouteImport } from './routes/api/public/primat-products'
+import { Route as MapIdRouteImport } from './routes/map.$id'
 import { Route as ApiPublicProductImageRouteImport } from './routes/api/public/product-image'
+import { Route as ApiPublicPrimatProductsRouteImport } from './routes/api/public/primat-products'
+import { Route as ApiPublicGmapsRouteImport } from './routes/api/public/gmaps'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlertsRoute = AlertsRouteImport.update({
-  id: '/alerts',
-  path: '/alerts',
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavoritesRoute = FavoritesRouteImport.update({
@@ -34,14 +29,14 @@ const FavoritesRoute = FavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MapIdRoute = MapIdRouteImport.update({
-  id: '/map/$id',
-  path: '/map/$id',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductIdRoute = ProductIdRouteImport.update({
@@ -49,9 +44,14 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicGmapsRoute = ApiPublicGmapsRouteImport.update({
-  id: '/api/public/gmaps',
-  path: '/api/public/gmaps',
+const MapIdRoute = MapIdRouteImport.update({
+  id: '/map/$id',
+  path: '/map/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicProductImageRoute = ApiPublicProductImageRouteImport.update({
+  id: '/api/public/product-image',
+  path: '/api/public/product-image',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPrimatProductsRoute = ApiPublicPrimatProductsRouteImport.update({
@@ -59,9 +59,9 @@ const ApiPublicPrimatProductsRoute = ApiPublicPrimatProductsRouteImport.update({
   path: '/api/public/primat-products',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicProductImageRoute = ApiPublicProductImageRouteImport.update({
-  id: '/api/public/product-image',
-  path: '/api/public/product-image',
+const ApiPublicGmapsRoute = ApiPublicGmapsRouteImport.update({
+  id: '/api/public/gmaps',
+  path: '/api/public/gmaps',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -149,18 +149,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/alerts': {
-      id: '/alerts'
-      path: '/alerts'
-      fullPath: '/alerts'
-      preLoaderRoute: typeof AlertsRouteImport
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favorites': {
@@ -170,18 +163,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/map/$id': {
-      id: '/map/$id'
-      path: '/map/$id'
-      fullPath: '/map/$id'
-      preLoaderRoute: typeof MapIdRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/product/$id': {
@@ -191,11 +184,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/gmaps': {
-      id: '/api/public/gmaps'
-      path: '/api/public/gmaps'
-      fullPath: '/api/public/gmaps'
-      preLoaderRoute: typeof ApiPublicGmapsRouteImport
+    '/map/$id': {
+      id: '/map/$id'
+      path: '/map/$id'
+      fullPath: '/map/$id'
+      preLoaderRoute: typeof MapIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/product-image': {
+      id: '/api/public/product-image'
+      path: '/api/public/product-image'
+      fullPath: '/api/public/product-image'
+      preLoaderRoute: typeof ApiPublicProductImageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/primat-products': {
@@ -205,11 +205,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPrimatProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/product-image': {
-      id: '/api/public/product-image'
-      path: '/api/public/product-image'
-      fullPath: '/api/public/product-image'
-      preLoaderRoute: typeof ApiPublicProductImageRouteImport
+    '/api/public/gmaps': {
+      id: '/api/public/gmaps'
+      path: '/api/public/gmaps'
+      fullPath: '/api/public/gmaps'
+      preLoaderRoute: typeof ApiPublicGmapsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
