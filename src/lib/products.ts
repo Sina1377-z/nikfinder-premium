@@ -18,48 +18,9 @@ import vapePurple from "@/assets/vape-purple.jpg";
 import vapeMint from "@/assets/vape-mint.jpg";
 import vapeRed from "@/assets/vape-red.jpg";
 import vapePodSilver from "@/assets/vape-pod-silver.jpg";
+import type { Category, Listing, Product, Stock, Store } from "@/lib/catalog/types";
 
-export type Category = "snus" | "vape-disposable" | "vape-refillable" | "cigarettes";
-export type Stock = "high" | "low" | "out";
-
-export type Store = {
-  id: string;
-  name: string;
-  hours: string;
-  isOpen: boolean;
-  address?: string;
-  city?: string;
-  chain?: string;
-  lat?: number;
-  lng?: number;
-  placeId?: string;
-  openingHours?: string[];
-};
-
-export type Listing = {
-  storeId: string;
-  price: number;
-  stock: Stock;
-  distanceKm: number;
-};
-
-export type Product = {
-  id: string;
-  name: string;
-  brand: string;
-  category: Category;
-  flavor: string;
-  flavorTags: string[];
-  strength: string;
-  strengthMg: number;
-  pouches?: number;
-  puffs?: number;
-  format: string;
-  ingredients: string;
-  description: string;
-  image: string;
-  listings: Listing[];
-};
+export type { Category, Listing, Product, Stock, Store } from "@/lib/catalog/types";
 
 export const STORES: Record<string, Store> = {
   s1: { id: "s1", name: "QuickStop Central", hours: "Open until 23:00", isOpen: true },
@@ -76,8 +37,7 @@ const POUCH_ING =
   "Nicotine, plant fibers (E460), water, humectants (E1520, E422), flavourings, sweeteners (E950, E955), acidity regulators (E500, E524), salt.";
 const LOOSE_ING =
   "Tobacco, water, salt, humectants (E1520, E422), flavourings, acidity regulator (E500).";
-const CIG_ING =
-  "Tobacco, paper, acetate filter. Smoke contains tar, nicotine and carbon monoxide.";
+const CIG_ING = "Tobacco, paper, acetate filter. Smoke contains tar, nicotine and carbon monoxide.";
 const VAPE_ING =
   "Propylene glycol (PG), vegetable glycerin (VG), nicotine salt, natural and artificial flavourings.";
 
@@ -89,7 +49,10 @@ const uid = (brand: string, name: string) =>
     .replace(/^-|-$/g, "") + `-${++idc}`;
 
 // Random-ish but deterministic listings generator
-function listings(base: number, ...variants: Array<[keyof typeof STORES, number, Stock, number]>): Listing[] {
+function listings(
+  base: number,
+  ...variants: Array<[keyof typeof STORES, number, Stock, number]>
+): Listing[] {
   return variants.map(([storeId, delta, stock, km]) => ({
     storeId,
     price: +(base + delta).toFixed(2),
@@ -159,7 +122,8 @@ const catalog: P[] = [
     pouches: 24,
     format: "Slim White Dry",
     ingredients: POUCH_ING,
-    description: "Sun-warm mango and pineapple over a light coconut note. Softer strength for longer sessions.",
+    description:
+      "Sun-warm mango and pineapple over a light coconut note. Softer strength for longer sessions.",
     image: pouchOrange,
     listings: listings(49, ["s3", -1, "high", 1.5], ["s4", 1, "high", 2.4]),
   },
@@ -240,7 +204,12 @@ const catalog: P[] = [
     ingredients: POUCH_ING,
     description: "The classic cool mint XQS — bright peppermint with a clean, dry finish.",
     image: pouchMintWhite,
-    listings: listings(55, ["s1", 0, "high", 0.4], ["s2", -2.5, "high", 1.2], ["s5", 3, "low", 3.1]),
+    listings: listings(
+      55,
+      ["s1", 0, "high", 0.4],
+      ["s2", -2.5, "high", 1.2],
+      ["s5", 3, "low", 3.1],
+    ),
   },
   {
     name: "Citrus Burst",
@@ -332,7 +301,8 @@ const catalog: P[] = [
     pouches: 24,
     format: "Original Portion",
     ingredients: LOOSE_ING,
-    description: "A classic Swedish portion with bergamot and a delicate floral note over rounded tobacco.",
+    description:
+      "A classic Swedish portion with bergamot and a delicate floral note over rounded tobacco.",
     image: pouchClassicBrown,
     listings: listings(45, ["s2", 0, "high", 1.2], ["s7", -1, "high", 2.7]),
   },
@@ -681,7 +651,12 @@ const catalog: P[] = [
     ingredients: CIG_ING,
     description: "A rounded full-flavour blend in the classic red pack.",
     image: cigRed,
-    listings: listings(85, ["s1", 0, "high", 0.4], ["s2", 2, "high", 1.2], ["s3", -0.5, "low", 1.5]),
+    listings: listings(
+      85,
+      ["s1", 0, "high", 0.4],
+      ["s2", 2, "high", 1.2],
+      ["s3", -0.5, "low", 1.5],
+    ),
   },
   {
     name: "Gold",
@@ -723,7 +698,12 @@ const catalog: P[] = [
     ingredients: CIG_ING,
     description: "A budget-friendly smooth blend with a clean, light finish.",
     image: cigBlue,
-    listings: listings(72, ["s3", 0, "high", 1.5], ["s6", 1, "high", 1.8], ["s7", -0.5, "high", 2.7]),
+    listings: listings(
+      72,
+      ["s3", 0, "high", 1.5],
+      ["s6", 1, "high", 1.8],
+      ["s7", -0.5, "high", 2.7],
+    ),
   },
   {
     name: "Red",
@@ -932,7 +912,12 @@ const catalog: P[] = [
     ingredients: VAPE_ING,
     description: "Layered raspberry and blueberry with a soft warmth. For the Aurora pod system.",
     image: vapePodSilver,
-    listings: listings(125, ["s2", 0, "high", 1.2], ["s4", -6, "high", 2.4], ["s5", 10, "out", 3.1]),
+    listings: listings(
+      125,
+      ["s2", 0, "high", 1.2],
+      ["s4", -6, "high", 2.4],
+      ["s5", 10, "out", 3.1],
+    ),
   },
 ];
 
@@ -961,9 +946,7 @@ export const CATEGORY_LABEL: Record<Category, string> = {
 };
 
 export const ALL_BRANDS = Array.from(new Set(PRODUCTS.map((p) => p.brand))).sort();
-export const ALL_FLAVOR_TAGS = Array.from(
-  new Set(PRODUCTS.flatMap((p) => p.flavorTags))
-).sort();
+export const ALL_FLAVOR_TAGS = Array.from(new Set(PRODUCTS.flatMap((p) => p.flavorTags))).sort();
 
 export function smartSearch(products: Product[], q: string): Product[] {
   const query = q.trim().toLowerCase();

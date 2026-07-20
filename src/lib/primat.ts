@@ -2,7 +2,14 @@
 // Modular wrapper around the Primat demo endpoint. Swap `PRIMAT_ENDPOINT`
 // for the full production endpoint later without touching the UI.
 
-import type { Category, Product, Stock, Store } from "@/lib/products";
+import type {
+  Category,
+  Product,
+  ProductProvider,
+  ProductSearchResult,
+  Stock,
+  Store,
+} from "@/lib/catalog/types";
 import { STORES } from "@/lib/products";
 
 import pouchMintWhite from "@/assets/pouch-mint-white.jpg";
@@ -105,13 +112,56 @@ const NIC_CATEGORY_TOKENS = [
 ];
 
 const NIC_BRAND_TOKENS = [
-  "velo", "zyn", "loop", "lundgren", "general", "göteborgs rapé", "goteborgs rape",
-  "skruf", "knox", "fix", "après", "apres", "xqs", "white fox", "ace", "volt",
-  "pablo", "cuba", "dope", "helwit", "swave", "rush", "siberia", "iceberg",
-  "on!", "rogue", "nordic spirit", "elf bar", "lost mary", "vuse", "iqos",
-  "heets", "terea", "kelly white", "ettan", "grov", "catch", "gotlands",
-  "marlboro", "camel", "l&m", "lucky strike", "pall mall", "prince", "chesterfield",
-  "juul", "vaporesso", "voopoo", "smok", "geekvape",
+  "velo",
+  "zyn",
+  "loop",
+  "lundgren",
+  "general",
+  "göteborgs rapé",
+  "goteborgs rape",
+  "skruf",
+  "knox",
+  "fix",
+  "après",
+  "apres",
+  "xqs",
+  "white fox",
+  "ace",
+  "volt",
+  "pablo",
+  "cuba",
+  "dope",
+  "helwit",
+  "swave",
+  "rush",
+  "siberia",
+  "iceberg",
+  "on!",
+  "rogue",
+  "nordic spirit",
+  "elf bar",
+  "lost mary",
+  "vuse",
+  "iqos",
+  "heets",
+  "terea",
+  "kelly white",
+  "ettan",
+  "grov",
+  "catch",
+  "gotlands",
+  "marlboro",
+  "camel",
+  "l&m",
+  "lucky strike",
+  "pall mall",
+  "prince",
+  "chesterfield",
+  "juul",
+  "vaporesso",
+  "voopoo",
+  "smok",
+  "geekvape",
 ];
 
 function isNicotineItem(item: PrimatItem): boolean {
@@ -124,12 +174,22 @@ function isNicotineItem(item: PrimatItem): boolean {
 function inferCategory(raw: string | undefined, name: string): Category {
   const s = `${raw ?? ""} ${name}`.toLowerCase();
   if (s.includes("cigarett") || s.includes("cigar")) return "cigarettes";
-  if (s.includes("engångs") || s.includes("engangs") || s.includes("disposable")) return "vape-disposable";
-  if (s.includes("vape") || s.includes("e-cig") || s.includes("ecig") || s.includes("pod")) return "vape-refillable";
+  if (s.includes("engångs") || s.includes("engangs") || s.includes("disposable"))
+    return "vape-disposable";
+  if (s.includes("vape") || s.includes("e-cig") || s.includes("ecig") || s.includes("pod"))
+    return "vape-refillable";
   return "snus";
 }
 
-const POUCH_IMAGES = [pouchMintWhite, pouchBlue, pouchRed, pouchOrange, pouchGreen, pouchBlack, pouchClassicBrown];
+const POUCH_IMAGES = [
+  pouchMintWhite,
+  pouchBlue,
+  pouchRed,
+  pouchOrange,
+  pouchGreen,
+  pouchBlack,
+  pouchClassicBrown,
+];
 const CIG_IMAGES = [cigRed, cigBlue, cigBlack];
 const VAPE_IMAGES = [vapeBlack, vapePurple, vapeMint, vapeRed];
 
@@ -193,7 +253,11 @@ function mapItem(item: PrimatItem, idx: number): Product {
     format: pkg || "—",
     ingredients: item.category ?? "",
     description:
-      [item.category, pkg, item.urls?.source ? `Källa: ${new URL(item.urls.source).hostname}` : null]
+      [
+        item.category,
+        pkg,
+        item.urls?.source ? `Källa: ${new URL(item.urls.source).hostname}` : null,
+      ]
         .filter(Boolean)
         .join(" · ") || `${brand} ${name}`,
     image: pickImage(category, id, item.image ?? item.image_url),
@@ -211,11 +275,7 @@ function mapItem(item: PrimatItem, idx: number): Product {
   return product;
 }
 
-export type PrimatSearchResult = {
-  products: Product[];
-  note?: string;
-  count: number;
-};
+export type PrimatSearchResult = ProductSearchResult;
 
 export async function searchPrimatProducts(
   query: string,
@@ -232,3 +292,8 @@ export async function searchPrimatProducts(
   const products = items.map(mapItem);
   return { products, note: json.note, count: products.length };
 }
+
+export const primatProductProvider: ProductProvider = {
+  search: searchPrimatProducts,
+  getCachedProduct: getCachedPrimatProduct,
+};
