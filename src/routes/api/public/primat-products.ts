@@ -7,6 +7,10 @@ const CORS = {
   "Access-Control-Max-Age": "86400",
 };
 
+const CACHE_TTL_MS = 5 * 60 * 1000;
+type CachedResponse = { body: string; expiresAt: number };
+const responseCache = new Map<string, CachedResponse>();
+
 export const Route = createFileRoute("/api/public/primat-products")({
   server: {
     handlers: {
@@ -14,15 +18,29 @@ export const Route = createFileRoute("/api/public/primat-products")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const q = url.searchParams.get("q") ?? "";
+        const cacheKey = q.trim().toLocaleLowerCase("sv-SE");
+        const cached = responseCache.get(cacheKey);
+        if (cached && cached.expiresAt > Date.now()) {
+          return new Response(cached.body, {
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "public, max-age=300",
+              ...CORS,
+            },
+          });
+        }
         const upstream = `https://primat.nu/api/v1/demo/products?q=${encodeURIComponent(q)}`;
         try {
           const res = await fetch(upstream, { headers: { Accept: "application/json" } });
           const body = await res.text();
+          if (res.ok) {
+            responseCache.set(cacheKey, { body, expiresAt: Date.now() + CACHE_TTL_MS });
+          }
           return new Response(body, {
             status: res.status,
             headers: {
               "Content-Type": "application/json",
-              "Cache-Control": "public, max-age=30",
+              "Cache-Control": "public, max-age=300",
               ...CORS,
             },
           });

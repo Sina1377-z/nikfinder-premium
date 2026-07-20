@@ -7,7 +7,6 @@ import { ProductCard } from "@/components/ProductCard";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { PRODUCTS, type Category } from "@/lib/products";
 import { usePrimatSearch } from "@/lib/usePrimatSearch";
-import { usePrimatCatalog } from "@/lib/usePrimatCatalog";
 import { useAgeGate } from "@/lib/favorites";
 import { useGeolocation } from "@/lib/useGeolocation";
 import { reverseGeocodeCity } from "@/lib/googleMaps";
@@ -27,7 +26,6 @@ function Home() {
   const [showFilters, setShowFilters] = useState(false);
 
   const api = usePrimatSearch(query);
-  const catalog = usePrimatCatalog();
   const geo = useGeolocation();
   const [city, setCity] = useState<string>("Locating…");
 
@@ -41,21 +39,14 @@ function Home() {
 
   const hasQuery = query.trim().length > 0;
   const apiProducts = api.data?.products ?? [];
-  const catalogProducts = useMemo(() => {
-    const productsById = new Map(PRODUCTS.map((product) => [product.id, product]));
-    catalog.products.forEach((product) => {
-      if (!productsById.has(product.id)) productsById.set(product.id, product);
-    });
-    return Array.from(productsById.values());
-  }, [catalog.products]);
   const userPoint =
     geo.latitude != null && geo.longitude != null
       ? { lat: geo.latitude, lng: geo.longitude }
       : null;
-  const enrichVersion = useStoreEnrichment(hasQuery ? apiProducts : catalogProducts, userPoint);
+  const enrichVersion = useStoreEnrichment(apiProducts, userPoint);
 
   const results = useMemo(() => {
-    let list = hasQuery ? apiProducts : catalogProducts;
+    let list: typeof PRODUCTS = hasQuery ? apiProducts : PRODUCTS;
     if (category !== "all") list = list.filter((p) => p.category === category);
     const arr = [...list];
     if (sort === "price-asc")
@@ -77,7 +68,7 @@ function Home() {
     if (sort === "strength") arr.sort((a, b) => b.strengthMg - a.strengthMg);
     return arr;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, hasQuery, apiProducts, catalogProducts, sort, enrichVersion]);
+  }, [category, hasQuery, apiProducts, sort, enrichVersion]);
 
   return (
     <div className="min-h-screen bg-background pb-28">
