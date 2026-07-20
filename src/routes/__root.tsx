@@ -68,7 +68,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "NikFinder TEST BUILD — Find nicotine products nearby" },
+      { title: "NikFinder — Find nicotine products nearby" },
       {
         name: "description",
         content:
