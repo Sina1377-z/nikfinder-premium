@@ -57,7 +57,7 @@ export type Product = {
   format: string;
   ingredients: string;
   description: string;
-  image?: string;
+  image: string;
   listings: Listing[];
 };
 

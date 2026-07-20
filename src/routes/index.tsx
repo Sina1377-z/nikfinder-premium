@@ -5,9 +5,8 @@ import { AgeGate } from "@/components/AgeGate";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryTabs } from "@/components/CategoryTabs";
-import { type Category } from "@/lib/products";
+import { PRODUCTS, type Category } from "@/lib/products";
 import { usePrimatSearch } from "@/lib/usePrimatSearch";
-import { usePrimatCatalog } from "@/lib/usePrimatCatalog";
 import { useAgeGate } from "@/lib/favorites";
 import { useGeolocation } from "@/lib/useGeolocation";
 import { reverseGeocodeCity } from "@/lib/googleMaps";
@@ -27,7 +26,6 @@ function Home() {
   const [showFilters, setShowFilters] = useState(false);
 
   const api = usePrimatSearch(query);
-  const catalog = usePrimatCatalog();
   const geo = useGeolocation();
   const [city, setCity] = useState<string>("Locating…");
 
@@ -41,12 +39,11 @@ function Home() {
 
   const hasQuery = query.trim().length > 0;
   const apiProducts = api.data?.products ?? [];
-  const catalogProducts = catalog.data?.products ?? [];
   const userPoint = geo.latitude != null && geo.longitude != null ? { lat: geo.latitude, lng: geo.longitude } : null;
-  const enrichVersion = useStoreEnrichment(hasQuery ? apiProducts : catalogProducts, userPoint);
+  const enrichVersion = useStoreEnrichment(apiProducts, userPoint);
 
   const results = useMemo(() => {
-    let list = hasQuery ? apiProducts : catalogProducts;
+    let list: typeof PRODUCTS = hasQuery ? apiProducts : PRODUCTS;
     if (category !== "all") list = list.filter((p) => p.category === category);
     const arr = [...list];
     if (sort === "price-asc")
@@ -58,7 +55,7 @@ function Home() {
     if (sort === "strength") arr.sort((a, b) => b.strengthMg - a.strengthMg);
     return arr;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, hasQuery, apiProducts, catalogProducts, sort, enrichVersion]);
+  }, [category, hasQuery, apiProducts, sort, enrichVersion]);
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -136,11 +133,11 @@ function Home() {
           <span className="font-mono text-xs text-muted-foreground">{results.length} items</span>
         </div>
 
-        {(hasQuery ? api.loading : catalog.loading) ? (
+        {hasQuery && api.loading ? (
           <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
             <p className="text-sm text-muted-foreground">Searching…</p>
           </div>
-        ) : (hasQuery ? api.error : catalog.error) ? (
+        ) : hasQuery && api.error ? (
           <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
             <p className="text-sm text-muted-foreground">Couldn't reach the catalog. Please try again.</p>
           </div>
