@@ -9,23 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as FavoritesRouteImport } from './routes/favorites'
-import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as MapIdRouteImport } from './routes/map.$id'
-import { Route as ApiPublicPrimatProductsRouteImport } from './routes/api/public/primat-products'
+import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as ApiPublicGmapsRouteImport } from './routes/api/public/gmaps'
+import { Route as ApiPublicPrimatProductsRouteImport } from './routes/api/public/primat-products'
 
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FavoritesRoute = FavoritesRouteImport.update({
-  id: '/favorites',
-  path: '/favorites',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlertsRoute = AlertsRouteImport.update({
@@ -33,14 +28,14 @@ const AlertsRoute = AlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProductIdRoute = ProductIdRouteImport.update({
-  id: '/product/$id',
-  path: '/product/$id',
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MapIdRoute = MapIdRouteImport.update({
@@ -48,14 +43,19 @@ const MapIdRoute = MapIdRouteImport.update({
   path: '/map/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicPrimatProductsRoute = ApiPublicPrimatProductsRouteImport.update({
-  id: '/api/public/primat-products',
-  path: '/api/public/primat-products',
+const ProductIdRoute = ProductIdRouteImport.update({
+  id: '/product/$id',
+  path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicGmapsRoute = ApiPublicGmapsRouteImport.update({
   id: '/api/public/gmaps',
   path: '/api/public/gmaps',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPrimatProductsRoute = ApiPublicPrimatProductsRouteImport.update({
+  id: '/api/public/primat-products',
+  path: '/api/public/primat-products',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -136,18 +136,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/favorites': {
-      id: '/favorites'
-      path: '/favorites'
-      fullPath: '/favorites'
-      preLoaderRoute: typeof FavoritesRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/alerts': {
@@ -157,18 +150,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/product/$id': {
-      id: '/product/$id'
-      path: '/product/$id'
-      fullPath: '/product/$id'
-      preLoaderRoute: typeof ProductIdRouteImport
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/map/$id': {
@@ -178,11 +171,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/primat-products': {
-      id: '/api/public/primat-products'
-      path: '/api/public/primat-products'
-      fullPath: '/api/public/primat-products'
-      preLoaderRoute: typeof ApiPublicPrimatProductsRouteImport
+    '/product/$id': {
+      id: '/product/$id'
+      path: '/product/$id'
+      fullPath: '/product/$id'
+      preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/gmaps': {
@@ -190,6 +183,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/gmaps'
       fullPath: '/api/public/gmaps'
       preLoaderRoute: typeof ApiPublicGmapsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/primat-products': {
+      id: '/api/public/primat-products'
+      path: '/api/public/primat-products'
+      fullPath: '/api/public/primat-products'
+      preLoaderRoute: typeof ApiPublicPrimatProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -208,13 +208,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
