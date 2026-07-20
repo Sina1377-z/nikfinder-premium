@@ -21,27 +21,58 @@ function categoryTerms(product: Product): string {
   return "cigarette cigarettes cigaretter cigg";
 }
 
-function searchFallbackProducts(products: Product[], query: string): Product[] {
+function normalizedText(value: string): string {
+  return normalizedTerms(value).join(" ");
+}
+
+function relevanceScore(product: Product, query: string, terms: string[]): number {
+  const brand = normalizedText(product.brand);
+  const name = normalizedText(product.name);
+  const productName = normalizedText(`${product.brand} ${product.name}`);
+  const productText = normalizedText(
+    [
+      product.brand,
+      product.name,
+      product.flavor,
+      product.flavorTags.join(" "),
+      product.format,
+    ].join(" "),
+  );
+  const productCategoryTerms = normalizedText(categoryTerms(product));
+
+  let score = 0;
+  if (query === productName || query === name) score += 1_000;
+  if (query === brand) score += 900;
+  if (productText.includes(query)) score += 400;
+
+  for (const term of terms) {
+    if (term === brand) score += 120;
+    if (name.includes(term)) score += 80;
+    else if (productText.includes(term)) score += 30;
+    if (productCategoryTerms.includes(term)) score += 5;
+  }
+
+  if (productCategoryTerms.includes(query)) score += 20;
+  return score;
+}
+
+function rankSearchResults(
+  products: Product[],
+  query: string,
+  excludeUnmatched = false,
+): Product[] {
   const terms = normalizedTerms(query);
   if (!terms.length) return [];
+  const normalizedQuery = terms.join(" ");
 
   return products
-    .map((product) => {
-      const haystack = normalizedTerms(
-        [
-          product.brand,
-          product.name,
-          product.flavor,
-          product.flavorTags.join(" "),
-          product.format,
-          categoryTerms(product),
-        ].join(" "),
-      ).join(" ");
-      const score = terms.reduce((total, term) => total + (haystack.includes(term) ? 1 : 0), 0);
-      return { product, score };
-    })
-    .filter(({ score }) => score > 0)
-    .sort((a, b) => b.score - a.score || a.product.name.localeCompare(b.product.name, "sv-SE"))
+    .map((product, index) => ({
+      product,
+      index,
+      score: relevanceScore(product, normalizedQuery, terms),
+    }))
+    .filter(({ score }) => !excludeUnmatched || score > 0)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ product }) => product);
 }
 
@@ -52,7 +83,7 @@ export function createProductCatalog(
   const fallbackById = new Map(fallbackProducts.map((product) => [product.id, product]));
 
   const fallbackSearch = (query: string): ProductSearchResult => {
-    const products = searchFallbackProducts(fallbackProducts, query);
+    const products = rankSearchResults(fallbackProducts, query, true);
     return {
       products,
       count: products.length,
@@ -64,7 +95,9 @@ export function createProductCatalog(
     search: async (query, opts) => {
       try {
         const result = await provider.search(query, opts);
-        return result.products.length ? result : fallbackSearch(query);
+        return result.products.length
+          ? { ...result, products: rankSearchResults(result.products, query) }
+          : fallbackSearch(query);
       } catch (error) {
         if ((error as { name?: string }).name === "AbortError") throw error;
         return fallbackSearch(query);
