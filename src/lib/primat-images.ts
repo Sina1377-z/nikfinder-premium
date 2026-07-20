@@ -80,6 +80,121 @@ const RESOLVED_EXTERNAL_PRIMAT_IMAGES: Record<string, ResolvedExternalImage> = {
     imageUrl:
       "https://v3-media-se.nettotobak.com/senettob/images/plytix-6981dedc6241964a4f797c43/500/500/fill/n/plytix-6981dedc6241964a4f797c43-png.png",
   },
+  // Snusbolaget verified matches (og:image from official product pages).
+  "5715345031828": {
+    brand: "Lundgrens",
+    name: "Vit Portion",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6926c6ac5523afe83482805d/500/500/fill/n/plytix-6926c6ac5523afe83482805d-png.png",
+  },
+  "5715345031859": {
+    brand: "Lundgrens",
+    name: "Vit Portion",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6926c6ac5523afe83482805d/500/500/fill/n/plytix-6926c6ac5523afe83482805d-png.png",
+  },
+  "7311250009501": {
+    brand: "General Extra Strong",
+    name: "Extra Stark",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-68d67e9e6d9b6052b0975711/500/500/fill/n/plytix-68d67e9e6d9b6052b0975711-png.png",
+  },
+  "7311250007422": {
+    brand: "XR",
+    name: "General Strong Slim White",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-68d68223bf4298108701f021/500/500/fill/n/plytix-68d68223bf4298108701f021-png.png",
+  },
+  "7311250449246": {
+    brand: "Ettan",
+    name: "Lös",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-68d53042fbe763f16cbf5578/500/500/fill/n/plytix-68d53042fbe763f16cbf5578-png.png",
+  },
+  "7311250449765": {
+    brand: "Ettan",
+    name: "Portion White",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-68d53096723a0fd32c9349dd/500/500/fill/n/plytix-68d53096723a0fd32c9349dd-png.png",
+  },
+  "7311250448751": {
+    brand: "Ettan",
+    name: "Original Portion",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-68d5306cf451e049fecc97fb/500/500/fill/n/plytix-68d5306cf451e049fecc97fb-png.png",
+  },
+  "7330196002766": {
+    brand: "skruf",
+    name: "White Stark",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-69b155911c6bf5731609a6be/500/500/fill/n/plytix-69b155911c6bf5731609a6be-png.png",
+  },
+  "7350122212144": {
+    brand: "Helwit",
+    name: "Cola",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6901d935b5c8d22d955f249b/500/500/fill/n/plytix-6901d935b5c8d22d955f249b-png.png",
+  },
+  "7350122210010": {
+    brand: "Helwit",
+    name: "Orange",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-69ddf1300aa726106a987a7d/500/500/fill/n/plytix-69ddf1300aa726106a987a7d-png.png",
+  },
+  "7350013611773": {
+    brand: "Knox",
+    name: "White",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6909e19d808012c5064c8903/500/500/fill/n/plytix-6909e19d808012c5064c8903-png.png",
+  },
+  "7350139644488": {
+    brand: "Knox",
+    name: "Portion",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6909e1384fe516bf3440e030/500/500/fill/n/plytix-6909e1384fe516bf3440e030-png.png",
+  },
+  "7350139646659": {
+    brand: "Knox",
+    name: "Yellow White",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6909e01f4fe516bf3440dfeb/500/500/fill/n/plytix-6909e01f4fe516bf3440dfeb-png.png",
+  },
+  "7350139644402": {
+    brand: "Knox",
+    name: "Lös",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6909e10184ed40de5d512b54/500/500/fill/n/plytix-6909e10184ed40de5d512b54-png.png",
+  },
+  "101544230_ST": {
+    brand: "Velo",
+    name: "Crispy Peppermint",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-69207c57a13e79c9c25016a8/500/500/fill/n/plytix-69207c57a13e79c9c25016a8-png.png",
+  },
+  "101855133_ST": {
+    brand: "ZYN",
+    name: "Blackcurrant Ice",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-69f84db321442fb771d22208/500/500/fill/n/plytix-69f84db321442fb771d22208-png.png",
+  },
+  "101855123_ST": {
+    brand: "ZYN",
+    name: "Cactus Spice",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-69f84e7e21442fb771d22224/500/500/fill/n/plytix-69f84e7e21442fb771d22224-png.png",
+  },
+  "2019450": {
+    brand: "Zyn",
+    name: "Citrus",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6a03112e654edd396aa690c5/500/500/fill/n/plytix-6a03112e654edd396aa690c5-png.png",
+  },
+  "2045538": {
+    brand: "Zyn",
+    name: "Spearmint",
+    imageUrl:
+      "https://v3-media-se.snusbolaget.se/sesnusbo/images/plytix-6a030b584e82104be30619da/500/500/fill/n/plytix-6a030b584e82104be30619da-png.png",
+  },
 };
 
 function normalize(value: string): string {
