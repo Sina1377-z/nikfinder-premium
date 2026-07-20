@@ -1,4 +1,4 @@
-import type { Category } from "@/lib/products";
+import type { Category } from "@/lib/catalog/types";
 
 const TABS: { id: Category | "all"; label: string }[] = [
   { id: "all", label: "All" },

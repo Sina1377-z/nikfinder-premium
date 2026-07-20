@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/lib/catalog/types";
 import { bestStock, lowestPrice, nearestKm } from "@/lib/products";
 import { useFavorites } from "@/lib/favorites";
 
@@ -35,7 +35,11 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             className="h-full w-full object-contain p-6 transition-transform duration-700 group-hover:scale-105"
           />
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(product.id); }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggle(product.id);
+            }}
             aria-label={fav ? "Remove from favorites" : "Add to favorites"}
             className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur-md transition-transform active:scale-90"
           >
@@ -47,7 +51,11 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full border border-black/10 bg-white/85 px-2.5 py-1 backdrop-blur-md">
             <span
               className={`size-1.5 rounded-full ${
-                stock === "high" ? "bg-primary" : stock === "low" ? "bg-yellow-500" : "bg-neutral-400"
+                stock === "high"
+                  ? "bg-primary"
+                  : stock === "low"
+                    ? "bg-yellow-500"
+                    : "bg-neutral-400"
               }`}
             />
             <span className="text-[10px] font-medium uppercase tracking-wider text-black/80">

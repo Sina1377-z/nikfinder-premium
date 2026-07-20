@@ -1,15 +1,15 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
-import { PRODUCTS, STORES } from "@/lib/products";
-import { getCachedPrimatProduct } from "@/lib/primat";
+import { STORES } from "@/lib/products";
+import { productCatalog } from "@/lib/catalog/defaultCatalog";
 import { useGeolocation } from "@/lib/useGeolocation";
 import { useStoreEnrichment } from "@/lib/useStoreEnrichment";
 import { googleMapsNavigateUrl } from "@/lib/googleMaps";
 
 export const Route = createFileRoute("/map/$id")({
   loader: ({ params }) => {
-    const product = PRODUCTS.find((p) => p.id === params.id) ?? getCachedPrimatProduct(params.id);
+    const product = productCatalog.getProductById(params.id);
     if (!product) throw notFound();
     return { product };
   },
@@ -18,7 +18,9 @@ export const Route = createFileRoute("/map/$id")({
     <div className="flex min-h-screen items-center justify-center px-6 text-center">
       <div>
         <h1 className="font-display text-2xl font-bold">Product not found</h1>
-        <Link to="/" className="mt-4 inline-block text-primary">Back home</Link>
+        <Link to="/" className="mt-4 inline-block text-primary">
+          Back home
+        </Link>
       </div>
     </div>
   ),
@@ -52,23 +54,39 @@ function loadMaps(): Promise<void> {
 function MapPage() {
   const { product } = Route.useLoaderData();
   const geo = useGeolocation();
-  const userPoint = geo.latitude != null && geo.longitude != null ? { lat: geo.latitude, lng: geo.longitude } : null;
+  const userPoint =
+    geo.latitude != null && geo.longitude != null
+      ? { lat: geo.latitude, lng: geo.longitude }
+      : null;
   const enrichVersion = useStoreEnrichment([product], userPoint);
   const mapRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    loadMaps().then(() => setReady(true)).catch((e) => setErr(e.message));
+    loadMaps()
+      .then(() => setReady(true))
+      .catch((e) => setErr(e.message));
   }, []);
 
   useEffect(() => {
     if (!ready || !mapRef.current || !window.google?.maps) return;
-    const listings = (product.listings as Array<{ storeId: string; price: number; distanceKm: number; stock: string }>)
+    const listings = (
+      product.listings as Array<{
+        storeId: string;
+        price: number;
+        distanceKm: number;
+        stock: string;
+      }>
+    )
       .map((l) => ({ l, s: STORES[l.storeId] }))
       .filter((x) => x.s?.lat != null && x.s?.lng != null);
 
-    const center = userPoint ?? (listings[0] ? { lat: listings[0].s.lat!, lng: listings[0].s.lng! } : { lat: 59.3293, lng: 18.0686 });
+    const center =
+      userPoint ??
+      (listings[0]
+        ? { lat: listings[0].s.lat!, lng: listings[0].s.lng! }
+        : { lat: 59.3293, lng: 18.0686 });
 
     const map = new google.maps.Map(mapRef.current, {
       center,
@@ -103,7 +121,9 @@ function MapPage() {
       bounds.extend(userPoint);
     }
 
-    const sortedListings = [...listings].sort((a, b) => (a.l.distanceKm || 0) - (b.l.distanceKm || 0));
+    const sortedListings = [...listings].sort(
+      (a, b) => (a.l.distanceKm || 0) - (b.l.distanceKm || 0),
+    );
     sortedListings.forEach(({ l, s }, i) => {
       const isNearest = i === 0;
       const pos = { lat: s.lat!, lng: s.lng! };
@@ -144,7 +164,7 @@ function MapPage() {
       bounds.extend(pos);
     });
 
-    if (!bounds.isEmpty() && (listings.length > 0)) {
+    if (!bounds.isEmpty() && listings.length > 0) {
       map.fitBounds(bounds, 60);
     }
   }, [ready, enrichVersion, product, userPoint]);
@@ -160,8 +180,12 @@ function MapPage() {
           <ChevronLeft className="size-4" />
         </Link>
         <div className="min-w-0">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-primary">Nearby stores</p>
-          <h1 className="truncate font-display text-base font-bold">{product.brand} · {product.name}</h1>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-primary">
+            Nearby stores
+          </p>
+          <h1 className="truncate font-display text-base font-bold">
+            {product.brand} · {product.name}
+          </h1>
         </div>
       </header>
       {err && (

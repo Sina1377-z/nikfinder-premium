@@ -1,9 +1,16 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronLeft, Heart, Bell, Navigation, Store as StoreIcon, Map as MapIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  Heart,
+  Bell,
+  Navigation,
+  Store as StoreIcon,
+  Map as MapIcon,
+} from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
-import { PRODUCTS, STORES, lowestPrice } from "@/lib/products";
-import { getCachedPrimatProduct } from "@/lib/primat";
+import { STORES, lowestPrice } from "@/lib/products";
+import { productCatalog } from "@/lib/catalog/defaultCatalog";
 import { useAgeGate, useAlerts, useFavorites } from "@/lib/favorites";
 import { AgeGate } from "@/components/AgeGate";
 import { useGeolocation } from "@/lib/useGeolocation";
@@ -12,7 +19,7 @@ import { googleMapsNavigateUrl } from "@/lib/googleMaps";
 
 export const Route = createFileRoute("/product/$id")({
   loader: ({ params }) => {
-    const product = PRODUCTS.find((p) => p.id === params.id) ?? getCachedPrimatProduct(params.id);
+    const product = productCatalog.getProductById(params.id);
     if (!product) throw notFound();
     return { product };
   },
@@ -20,7 +27,10 @@ export const Route = createFileRoute("/product/$id")({
     meta: loaderData
       ? [
           { title: `${loaderData.product.name} — NikFinder` },
-          { name: "description", content: `${loaderData.product.brand} · ${loaderData.product.flavor}. Compare prices and stock nearby.` },
+          {
+            name: "description",
+            content: `${loaderData.product.brand} · ${loaderData.product.flavor}. Compare prices and stock nearby.`,
+          },
         ]
       : [{ title: "Product — NikFinder" }],
   }),
@@ -29,13 +39,19 @@ export const Route = createFileRoute("/product/$id")({
     <div className="flex min-h-screen items-center justify-center px-6 text-center">
       <div>
         <h1 className="font-display text-2xl font-bold">Product not found</h1>
-        <Link to="/" className="mt-4 inline-block text-primary">Back home</Link>
+        <Link to="/" className="mt-4 inline-block text-primary">
+          Back home
+        </Link>
       </div>
     </div>
   ),
 });
 
-const stockCopy: Record<"high" | "low" | "out", string> = { high: "In stock", low: "Low stock", out: "Out of stock" };
+const stockCopy: Record<"high" | "low" | "out", string> = {
+  high: "In stock",
+  low: "Low stock",
+  out: "Out of stock",
+};
 
 type SortMode = "nearest" | "cheapest";
 
@@ -45,11 +61,16 @@ function ProductPage() {
   const { isFav, toggle } = useFavorites();
   const { has, toggle: toggleAlert } = useAlerts();
   const geo = useGeolocation();
-  const userPoint = geo.latitude != null && geo.longitude != null ? { lat: geo.latitude, lng: geo.longitude } : null;
+  const userPoint =
+    geo.latitude != null && geo.longitude != null
+      ? { lat: geo.latitude, lng: geo.longitude }
+      : null;
   const enrichVersion = useStoreEnrichment([product], userPoint);
   const [sortMode, setSortMode] = useState<SortMode>("nearest");
   const [openHoursFor, setOpenHoursFor] = useState<string | null>(null);
-  const [hoursMap, setHoursMap] = useState<Record<string, string[] | "loading" | "unavailable">>({});
+  const [hoursMap, setHoursMap] = useState<Record<string, string[] | "loading" | "unavailable">>(
+    {},
+  );
 
   // Track enrichVersion so listing distances re-render.
   void enrichVersion;
@@ -128,9 +149,15 @@ function ProductPage() {
 
       <main className="relative z-10 mx-auto -mt-16 max-w-lg px-5 space-y-8">
         <section className="animate-fade-up">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-primary">{product.brand}</p>
-          <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight">{product.name}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{product.flavor} · {product.format}</p>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-primary">
+            {product.brand}
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight">
+            {product.name}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {product.flavor} · {product.format}
+          </p>
 
           <div className="mt-5 flex gap-3 overflow-x-auto no-scrollbar">
             <Stat label="Strength" value={product.strength} />
@@ -142,13 +169,17 @@ function ProductPage() {
         </section>
 
         <section className="animate-fade-up rounded-3xl border border-border bg-card/50 p-5">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Lowest nearby</p>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            Lowest nearby
+          </p>
           <div className="mt-1 flex items-baseline justify-between">
             <p className="font-display text-4xl font-extrabold text-primary">
               {cheapest.toFixed(2)}
               <span className="ml-1 text-sm font-mono text-muted-foreground">SEK</span>
             </p>
-            <p className="text-xs text-muted-foreground text-right">at {STORES[cheapestListing.storeId].name}</p>
+            <p className="text-xs text-muted-foreground text-right">
+              at {STORES[cheapestListing.storeId].name}
+            </p>
           </div>
         </section>
 
@@ -240,16 +271,24 @@ function ProductPage() {
                 )}
                 {isOpenPanel && (
                   <div className="mt-3 rounded-2xl border border-border bg-background/40 p-3 text-xs text-foreground/85">
-                    {openState === "loading" && <p className="text-muted-foreground">Loading opening hours…</p>}
-                    {openState === "unavailable" && <p className="text-muted-foreground">Opening hours unavailable.</p>}
+                    {openState === "loading" && (
+                      <p className="text-muted-foreground">Loading opening hours…</p>
+                    )}
+                    {openState === "unavailable" && (
+                      <p className="text-muted-foreground">Opening hours unavailable.</p>
+                    )}
                     {Array.isArray(openState) && (
                       <ul className="space-y-1">
                         {openState.map((line) => (
-                          <li key={line} className="font-mono text-[11px]">{line}</li>
+                          <li key={line} className="font-mono text-[11px]">
+                            {line}
+                          </li>
                         ))}
                       </ul>
                     )}
-                    {!openState && <p className="text-muted-foreground">Opening hours unavailable.</p>}
+                    {!openState && (
+                      <p className="text-muted-foreground">Opening hours unavailable.</p>
+                    )}
                   </div>
                 )}
               </div>
@@ -258,10 +297,14 @@ function ProductPage() {
         </section>
 
         <section className="animate-fade-up space-y-3">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">About</h2>
+          <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+            About
+          </h2>
           <p className="text-sm leading-relaxed text-foreground/85">{product.description}</p>
           <div className="rounded-2xl border border-border bg-card/40 p-4">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Ingredients</p>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              Ingredients
+            </p>
             <p className="mt-1 text-xs leading-relaxed text-foreground/80">{product.ingredients}</p>
           </div>
         </section>
@@ -289,7 +332,9 @@ function ProductPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-[110px] rounded-2xl border border-border bg-card/50 px-4 py-3">
-      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
       <p className="mt-0.5 text-sm font-semibold">{value}</p>
     </div>
   );

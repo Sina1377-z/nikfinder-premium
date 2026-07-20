@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
-import { STORES, type Product } from "@/lib/products";
-import { findStoresByChain, getPlaceDetails, type GeoPoint, type PlaceInfo } from "@/lib/googleMaps";
+import { STORES } from "@/lib/products";
+import type { Product } from "@/lib/catalog/types";
+import {
+  findStoresByChain,
+  getPlaceDetails,
+  type GeoPoint,
+  type PlaceInfo,
+} from "@/lib/googleMaps";
 import { distanceKm } from "@/lib/useGeolocation";
 
 // Assigns real Google Places store info (name, address, coords, hours) to
@@ -11,10 +17,7 @@ import { distanceKm } from "@/lib/useGeolocation";
 const enrichedChains = new Set<string>(); // key: chain|latRound,lngRound
 const enrichedStores = new Set<string>(); // storeId
 
-export function useStoreEnrichment(
-  products: Product[],
-  user: GeoPoint | null,
-): number {
+export function useStoreEnrichment(products: Product[], user: GeoPoint | null): number {
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
@@ -53,7 +56,10 @@ export function useStoreEnrichment(
         for (const l of p.listings) {
           const s = STORES[l.storeId];
           if (s?.lat != null && s?.lng != null) {
-            l.distanceKm = +distanceKm({ lat: user.lat, lon: user.lng }, { lat: s.lat, lon: s.lng }).toFixed(2);
+            l.distanceKm = +distanceKm(
+              { lat: user.lat, lon: user.lng },
+              { lat: s.lat, lon: s.lng },
+            ).toFixed(2);
           }
         }
       }

@@ -3,11 +3,8 @@ import { useMemo, useState } from "react";
 import { Search as SearchIcon, Tag, Package, Store } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
-import {
-  autocomplete,
-  relatedSuggestions,
-} from "@/lib/products";
-import { usePrimatSearch } from "@/lib/usePrimatSearch";
+import { autocomplete, relatedSuggestions } from "@/lib/products";
+import { useCatalogSearch } from "@/lib/useCatalogSearch";
 import { useAgeGate } from "@/lib/favorites";
 import { AgeGate } from "@/components/AgeGate";
 
@@ -15,7 +12,10 @@ export const Route = createFileRoute("/search")({
   head: () => ({
     meta: [
       { title: "Search — NikFinder" },
-      { name: "description", content: "Smart search across all nicotine products by brand, flavor, type or strength." },
+      {
+        name: "description",
+        content: "Smart search across all nicotine products by brand, flavor, type or strength.",
+      },
     ],
   }),
   component: SearchPage,
@@ -44,7 +44,7 @@ function SearchPage() {
   const [q, setQ] = useState("");
   const [focused, setFocused] = useState(false);
 
-  const api = usePrimatSearch(q);
+  const api = useCatalogSearch(q);
   const results = api.data?.products ?? [];
   const suggestions = useMemo(() => autocomplete(q, 6), [q]);
   const related = useMemo(() => (q.trim() ? relatedSuggestions(q, 6) : []), [q]);
@@ -56,7 +56,9 @@ function SearchPage() {
       {verified === false && <AgeGate onConfirm={confirm} />}
       <header className="mx-auto max-w-lg px-5 pt-[max(2rem,env(safe-area-inset-top))] pb-4">
         <p className="text-[10px] font-mono uppercase tracking-widest text-primary">Smart search</p>
-        <h1 className="mb-5 font-display text-3xl font-extrabold tracking-tight">What are you after?</h1>
+        <h1 className="mb-5 font-display text-3xl font-extrabold tracking-tight">
+          What are you after?
+        </h1>
         <div className="relative">
           <SearchIcon className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -95,7 +97,9 @@ function SearchPage() {
         </div>
         {!q && (
           <div className="mt-5">
-            <p className="mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Trending</p>
+            <p className="mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              Trending
+            </p>
             <div className="flex flex-wrap gap-2">
               {SUGGESTIONS.map((s) => (
                 <button
@@ -136,7 +140,9 @@ function SearchPage() {
         )}
         {q && !api.loading && api.error && (
           <div className="rounded-3xl border border-border bg-card/40 p-10 text-center">
-            <p className="text-sm text-muted-foreground">Couldn't reach the catalog. Please try again.</p>
+            <p className="text-sm text-muted-foreground">
+              Couldn't reach the catalog. Please try again.
+            </p>
           </div>
         )}
         {q && !api.loading && !api.error && results.length === 0 && (
@@ -148,7 +154,9 @@ function SearchPage() {
           <>
             <p className="mb-4 font-mono text-xs text-muted-foreground">{results.length} results</p>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {results.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+              {results.map((p, i) => (
+                <ProductCard key={p.id} product={p} index={i} />
+              ))}
             </div>
           </>
         )}

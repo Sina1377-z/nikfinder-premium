@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { searchPrimatProducts, type PrimatSearchResult } from "@/lib/primat";
+import type { ProductSearchResult } from "@/lib/catalog/types";
+import { productCatalog } from "@/lib/catalog/defaultCatalog";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
-const SESSION_CACHE_PREFIX = "nikfinder:primat-search:";
+const SESSION_CACHE_PREFIX = "nikfinder:catalog-search:";
 
 type CachedSearch = {
   expiresAt: number;
-  data: PrimatSearchResult;
+  data: ProductSearchResult;
 };
 
 const memoryCache = new Map<string, CachedSearch>();
@@ -15,7 +16,7 @@ function cacheKey(query: string) {
   return query.trim().toLocaleLowerCase("sv-SE");
 }
 
-function readCachedSearch(key: string): PrimatSearchResult | null {
+function readCachedSearch(key: string): ProductSearchResult | null {
   const now = Date.now();
   const memory = memoryCache.get(key);
   if (memory?.expiresAt && memory.expiresAt > now) return memory.data;
@@ -36,7 +37,7 @@ function readCachedSearch(key: string): PrimatSearchResult | null {
   }
 }
 
-function cacheSearch(key: string, data: PrimatSearchResult) {
+function cacheSearch(key: string, data: ProductSearchResult) {
   const cached: CachedSearch = { data, expiresAt: Date.now() + CACHE_TTL_MS };
   memoryCache.set(key, cached);
   try {
@@ -46,14 +47,14 @@ function cacheSearch(key: string, data: PrimatSearchResult) {
   }
 }
 
-export type PrimatSearchState = {
-  data: PrimatSearchResult | null;
+export type CatalogSearchState = {
+  data: ProductSearchResult | null;
   loading: boolean;
   error: string | null;
 };
 
-export function usePrimatSearch(query: string, debounceMs = 300): PrimatSearchState {
-  const [state, setState] = useState<PrimatSearchState>({
+export function useCatalogSearch(query: string, debounceMs = 300): CatalogSearchState {
+  const [state, setState] = useState<CatalogSearchState>({
     data: null,
     loading: false,
     error: null,
@@ -72,20 +73,25 @@ export function usePrimatSearch(query: string, debounceMs = 300): PrimatSearchSt
       return;
     }
     const ctrl = new AbortController();
-    const t = setTimeout(async () => {
-      setState((s) => ({ ...s, loading: true, error: null }));
+    const timeout = setTimeout(async () => {
+      setState((current) => ({ ...current, loading: true, error: null }));
       try {
-        const data = await searchPrimatProducts(q, { signal: ctrl.signal });
+        const data = await productCatalog.search(q, { signal: ctrl.signal });
         cacheSearch(key, data);
         setState({ data, loading: false, error: null });
-      } catch (err) {
-        if ((err as { name?: string }).name === "AbortError") return;
-        setState({ data: null, loading: false, error: (err as Error).message || "Search failed" });
+      } catch (error) {
+        if ((error as { name?: string }).name === "AbortError") return;
+        setState({
+          data: null,
+          loading: false,
+          error: (error as Error).message || "Search failed",
+        });
       }
     }, debounceMs);
+
     return () => {
       ctrl.abort();
-      clearTimeout(t);
+      clearTimeout(timeout);
     };
   }, [query, debounceMs]);
 

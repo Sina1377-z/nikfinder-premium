@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { PRODUCTS, type Category } from "@/lib/products";
-import { usePrimatSearch } from "@/lib/usePrimatSearch";
+import { useCatalogSearch } from "@/lib/useCatalogSearch";
 import { useAgeGate } from "@/lib/favorites";
 import { useGeolocation } from "@/lib/useGeolocation";
 import { reverseGeocodeCity } from "@/lib/googleMaps";
@@ -25,7 +25,7 @@ function Home() {
   const [sort, setSort] = useState<SortKey>("distance");
   const [showFilters, setShowFilters] = useState(false);
 
-  const api = usePrimatSearch(query);
+  const api = useCatalogSearch(query);
   const geo = useGeolocation();
   const [city, setCity] = useState<string>("Locating…");
 
