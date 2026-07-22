@@ -185,6 +185,16 @@ function Home() {
         )}
       </main>
 
+      <footer className="mx-auto flex max-w-lg justify-end px-5 pb-3">
+        <img
+          src="/images/age-restriction-18.png"
+          alt="Under 18 years old tobacco sales prohibited"
+          width={80}
+          height={80}
+          className="size-20"
+        />
+      </footer>
+
       <BottomNav />
     </div>
   );

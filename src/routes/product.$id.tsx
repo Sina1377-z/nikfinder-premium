@@ -127,7 +127,7 @@ function ProductPage() {
             alt={product.name}
             width={800}
             height={800}
-            className="h-full w-full object-contain p-10"
+            className="mx-auto block h-[82%] w-[82%] object-contain p-10"
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background" />
         </div>
@@ -323,6 +323,16 @@ function ProductPage() {
           </button>
         </div>
       </main>
+
+      <footer className="mx-auto flex max-w-lg justify-end px-5 pb-3">
+        <img
+          src="/images/age-restriction-18.png"
+          alt="Under 18 years old tobacco sales prohibited"
+          width={80}
+          height={80}
+          className="size-20"
+        />
+      </footer>
 
       <BottomNav />
     </div>
